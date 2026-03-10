@@ -82,6 +82,14 @@ io.on('connection', (socket) => {
     socket.to(room).emit('pause');
   });
 
+  // Ses kanalına katıldı — odadaki herkese bildir (offer alsınlar)
+  socket.on('voice-join', () => {
+    const { room } = socket.data;
+    if (!room) return;
+    // Odadaki diğer herkese: "bana offer gönder" de
+    socket.to(room).emit('voice-request-offer', { from: socket.id });
+  });
+
   // WebRTC sinyalleri (ses için)
   socket.on('offer', ({ to, offer }) => {
     io.to(to).emit('offer', { from: socket.id, offer });
