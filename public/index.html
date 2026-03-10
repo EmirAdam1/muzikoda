@@ -496,6 +496,11 @@ function initSocket(){
   socket.on('pause',()=>rPause());
   socket.on('speaking',({name,v})=>setSpk(name,v));
 
+  socket.on('voice-request-offer', ({from})=>{
+    // Karşı taraf ses kanalına girdi, biz de ona offer gönderelim
+    if(S.voiceOn) sendOffer(from);
+  });
+
   // WebRTC sinyalleri
   socket.on('offer',({from,offer})=>handleOffer(from,offer));
   socket.on('answer',({from,answer})=>handleAnswer(from,answer));
@@ -606,6 +611,8 @@ async function toggleVoice(){
       st.textContent='· bağlı';st.style.color='var(--green)';
       setupVAD(localStream);upP(S.me,{micOn:true});
       T('Ses kanalına bağlandın 🎙️','✅');
+      // Odadaki herkese offer gönder
+      bc('voice-join',{});
     }catch(e){T('Mikrofon izni gerekli!','❌');}
   } else {
     localStream?.getTracks().forEach(t=>t.stop());localStream=null;
@@ -645,11 +652,36 @@ async function handleOffer(from,offer){
   bc('answer',{to:from,answer:a});
 }
 async function handleAnswer(from,answer){await pcs[from]?.setRemoteDescription(new RTCSessionDescription(answer));}
-async function handleIce(from,candidate){await pcs[from]?.addIceCandidate(new RTCIceCandidate(candidate));}
+async function handleIce(from,candidate){
+  try{await pcs[from]?.addIceCandidate(new RTCIceCandidate(candidate));}catch(e){}
+}
+async function sendOffer(to){
+  if(!localStream)return;
+  const pc=mkPc(to);
+  const offer=await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  bc('offer',{to,offer});
+}
 function mkPc(pid){
-  const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
-  pcs[pid]=pc;localStream?.getTracks().forEach(t=>pc.addTrack(t,localStream));
-  pc.ontrack=e=>{const a=document.createElement('audio');a.autoplay=true;a.srcObject=e.streams[0];document.getElementById('rau').appendChild(a);};
+  const pc=new RTCPeerConnection({
+    iceServers:[
+      {urls:'stun:stun.l.google.com:19302'},
+      {urls:'stun:stun1.l.google.com:19302'},
+      {urls:'stun:stun2.l.google.com:19302'},
+      {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
+      {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},
+    ]
+  });
+  pcs[pid]=pc;
+  localStream?.getTracks().forEach(t=>pc.addTrack(t,localStream));
+  pc.ontrack=e=>{
+    const existing=document.getElementById('audio-'+pid);
+    if(existing)existing.remove();
+    const a=document.createElement('audio');
+    a.id='audio-'+pid;a.autoplay=true;
+    a.srcObject=e.streams[0];
+    document.getElementById('rau').appendChild(a);
+  };
   pc.onicecandidate=e=>{if(e.candidate)bc('ice',{to:pid,candidate:e.candidate});};
   return pc;
 }
