@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MüzikOda</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #0e0f14;
+  --panel:  #16181f;
+  --card:   #1e2029;
+  --hover:  #252733;
+  --border: rgba(255,255,255,0.06);
+  --accent: #5b6af5;
+  --green:  #3ecf8e;
+  --red:    #f05c5c;
+  --text:   #e8eaf2;
+  --sub:    rgba(232,234,242,0.42);
+  --r:      14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg);color:var(--text);
+  height:100vh;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+
+/* LANDING */
+#landing{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  height:100vh;gap:28px;padding:24px;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(91,106,245,.13) 0%,transparent 70%);
+}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-icon{
+  width:54px;height:54px;border-radius:16px;
+  background:linear-gradient(135deg,#5b6af5,#8b5cf6);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;
+  box-shadow:0 8px 30px rgba(91,106,245,.45);
+}
+.brand-name{font-size:1.9rem;font-weight:800;letter-spacing:-.04em;}
+.brand-tag{color:var(--sub);font-size:.85rem;margin-top:2px;}
+
+.lbox{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:20px;padding:26px;
+  width:100%;max-width:400px;
+  display:flex;flex-direction:column;gap:18px;
+}
+.lbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);}
+.flds{display:flex;flex-direction:column;gap:8px;}
+.f{
+  width:100%;background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:11px 14px;
+  color:var(--text);font-family:inherit;font-size:.9rem;
+  outline:none;transition:border-color .2s;
+}
+.f::placeholder{color:var(--sub);}
+.f:focus{border-color:var(--accent);}
+.btn{
+  border:none;border-radius:10px;padding:12px;
+  font-family:inherit;font-size:.88rem;font-weight:700;
+  cursor:pointer;transition:all .15s;width:100%;
+}
+.btn-p{background:var(--accent);color:#fff;box-shadow:0 4px 18px rgba(91,106,245,.35);}
+.btn-p:hover{background:#4a59e8;transform:translateY(-1px);}
+.btn-s{background:var(--card);color:var(--text);border:1px solid var(--border);}
+.btn-s:hover{background:var(--hover);}
+.or{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:.78rem;}
+.or::before,.or::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* APP */
+#app{display:none;flex:1;overflow:hidden;flex-direction:column;}
+#app.on{display:flex;}
+
+.topbar{
+  height:52px;display:flex;align-items:center;
+  justify-content:space-between;
+  padding:0 16px;border-bottom:1px solid var(--border);
+  background:var(--panel);flex-shrink:0;gap:12px;
+}
+.t-brand{font-weight:800;font-size:1.05rem;letter-spacing:-.03em;}
+.room-chip{
+  display:flex;align-items:center;gap:6px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:100px;padding:4px 12px;
+  font-size:.78rem;font-weight:600;color:var(--sub);
+}
+.dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 6px var(--green);
+  animation:dp 2s ease-in-out infinite;
+}
+@keyframes dp{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+.t-right{display:flex;align-items:center;gap:8px;}
+.music-tog{
+  display:flex;align-items:center;gap:6px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:100px;padding:5px 13px 5px 9px;
+  font-size:.78rem;font-weight:700;color:var(--sub);
+  cursor:pointer;transition:all .15s;
+}
+.music-tog:hover{border-color:var(--accent);color:var(--text);}
+.music-tog.on{background:rgba(91,106,245,.12);border-color:rgba(91,106,245,.4);color:var(--accent);}
+.me-chip{display:flex;align-items:center;gap:7px;font-size:.82rem;font-weight:600;color:var(--sub);}
+.av{
+  border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-weight:800;flex-shrink:0;
+}
+
+.main{display:flex;flex:1;overflow:hidden;}
+
+/* LEFT */
+.left{
+  display:flex;flex-direction:column;
+  flex:1;overflow:hidden;
+  border-right:1px solid var(--border);
+}
+
+/* Voice */
+.vcroom{padding:16px;border-bottom:1px solid var(--border);}
+.vch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.vct{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.92rem;}
+.vcst{font-size:.7rem;font-weight:500;color:var(--sub);}
+.vc-btns{display:flex;gap:8px;}
+.ib{
+  width:38px;height:38px;border-radius:50%;
+  border:1px solid var(--border);
+  background:var(--card);color:var(--text);
+  cursor:pointer;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.ib:hover{background:var(--hover);}
+.ib.g{background:rgba(62,207,142,.12);border-color:rgba(62,207,142,.4);color:var(--green);box-shadow:0 0 14px rgba(62,207,142,.2);}
+.ib.r{background:rgba(240,92,92,.12);border-color:rgba(240,92,92,.4);color:var(--red);}
+
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;}
+.pcard{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:14px 8px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  transition:all .2s;position:relative;
+}
+.pcard.spk{
+  border-color:rgba(62,207,142,.5);
+  background:rgba(62,207,142,.07);
+  box-shadow:0 0 18px rgba(62,207,142,.1);
+}
+.p-av-wrap{position:relative;}
+.pring{
+  position:absolute;inset:-4px;border-radius:50%;
+  border:2px solid var(--green);opacity:0;transition:opacity .2s;
+}
+.pcard.spk .pring{opacity:1;animation:rp 1.2s ease-in-out infinite;}
+@keyframes rp{0%,100%{transform:scale(1);}50%{transform:scale(1.1);opacity:.5;}}
+.pname{font-size:.71rem;font-weight:600;color:var(--sub);text-align:center;max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pmic{position:absolute;bottom:6px;right:6px;font-size:.62rem;}
+
+/* Chat */
+.chat{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.ch{padding:10px 16px;border-bottom:1px solid var(--border);font-size:.73rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;}
+.msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:1px;scrollbar-width:thin;scrollbar-color:var(--card) transparent;}
+.msg{display:flex;gap:10px;padding:5px 8px;border-radius:8px;transition:background .1s;animation:fi .18s ease;}
+.msg:hover{background:var(--card);}
+.msg.sys{justify-content:center;font-size:.73rem;color:var(--sub);font-style:italic;padding:3px;}
+@keyframes fi{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+.mbody{}
+.mwho{font-size:.72rem;font-weight:700;margin-bottom:2px;}
+.mtxt{font-size:.875rem;line-height:1.45;}
+.cinput{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.cf{
+  flex:1;background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:9px 13px;
+  color:var(--text);font-family:inherit;font-size:.875rem;
+  outline:none;transition:border-color .2s;
+}
+.cf:focus{border-color:var(--accent);}
+.cf::placeholder{color:var(--sub);}
+.sbtn{
+  width:38px;height:38px;border-radius:10px;
+  background:var(--accent);color:#fff;border:none;
+  cursor:pointer;font-size:.9rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.sbtn:hover{background:#4a59e8;}
+
+/* RIGHT: music */
+.mpanel{
+  width:290px;flex-shrink:0;
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:width .3s ease,opacity .3s ease;
+}
+.mpanel.hide{width:0;opacity:0;pointer-events:none;}
+
+.mph{
+  height:52px;display:flex;align-items:center;
+  justify-content:space-between;
+  padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.mpt{font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:7px;}
+
+.vizbar{display:flex;align-items:flex-end;gap:2px;height:16px;}
+.vb{width:3px;background:var(--accent);border-radius:2px;animation:vba .7s ease-in-out infinite alternate;}
+.vb:nth-child(1){height:6px;animation-delay:0s;}
+.vb:nth-child(2){height:12px;animation-delay:.1s;}
+.vb:nth-child(3){height:8px;animation-delay:.2s;}
+.vb:nth-child(4){height:14px;animation-delay:.3s;}
+.vb:nth-child(5){height:9px;animation-delay:.4s;}
+@keyframes vba{from{transform:scaleY(.25);}to{transform:scaleY(1);}}
+.vizbar.off .vb{animation-play-state:paused;transform:scaleY(.25);opacity:.3;}
+
+/* np card */
+.npcard{
+  margin:12px;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--r);overflow:hidden;
+}
+.npthumb{width:100%;aspect-ratio:16/9;background:#000;position:relative;overflow:hidden;}
+.npthumb iframe{width:100%;height:100%;border:none;display:block;}
+.npph{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:7px;color:var(--sub);font-size:.8rem;background:var(--bg);
+}
+.npinfo{padding:10px 12px 12px;}
+.nptitle{font-size:.87rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.npsub{font-size:.72rem;color:var(--sub);}
+
+/* controls */
+.mctrls{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 12px 12px;flex-shrink:0;}
+.mc{background:none;border:none;color:var(--sub);cursor:pointer;font-size:1rem;padding:6px;border-radius:8px;transition:all .15s;}
+.mc:hover{color:var(--text);background:var(--card);}
+.mc.main{
+  background:var(--accent);color:#fff;
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 12px rgba(91,106,245,.4);font-size:.9rem;
+}
+.mc.main:hover{background:#4a59e8;}
+
+/* add */
+.addsong{margin:0 12px;display:flex;gap:6px;}
+.af{
+  flex:1;background:var(--card);border:1px solid var(--border);
+  border-radius:9px;padding:8px 11px;
+  color:var(--text);font-family:inherit;font-size:.8rem;
+  outline:none;transition:border-color .2s;
+}
+.af:focus{border-color:var(--accent);}
+.af::placeholder{color:var(--sub);}
+.abtn{
+  background:var(--accent);color:#fff;border:none;
+  border-radius:9px;padding:0 12px;
+  font-family:inherit;font-size:.78rem;font-weight:700;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.abtn:hover{background:#4a59e8;}
+
+.qhead{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px 6px;
+  font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);
+}
+.qlist{
+  flex:1;overflow-y:auto;padding:0 12px 12px;
+  display:flex;flex-direction:column;gap:4px;
+  scrollbar-width:thin;scrollbar-color:var(--card) transparent;
+}
+.qi{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 9px;border-radius:10px;
+  cursor:pointer;transition:all .15s;border:1px solid transparent;
+}
+.qi:hover{background:var(--card);border-color:var(--border);}
+.qi.active{background:rgba(91,106,245,.1);border-color:rgba(91,106,245,.3);}
+.qthumb{
+  width:38px;height:38px;border-radius:7px;
+  overflow:hidden;flex-shrink:0;background:var(--hover);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+}
+.qthumb img{width:100%;height:100%;object-fit:cover;}
+.qinfo{flex:1;overflow:hidden;}
+.qtitle{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.qby{font-size:.7rem;color:var(--sub);}
+.qdel{background:none;border:none;color:var(--sub);cursor:pointer;font-size:.82rem;padding:3px;border-radius:5px;opacity:0;transition:all .1s;}
+.qi:hover .qdel{opacity:1;}
+.qdel:hover{color:var(--red);background:rgba(240,92,92,.1);}
+
+/* avatar colors */
+.c0{background:linear-gradient(135deg,#5b6af5,#8b5cf6);}
+.c1{background:linear-gradient(135deg,#3ecf8e,#3eb5cf);}
+.c2{background:linear-gradient(135deg,#f05c5c,#f59642);}
+.c3{background:linear-gradient(135deg,#f5c842,#cf9b3e);}
+.c4{background:linear-gradient(135deg,#cf3ebd,#5b6af5);}
+
+/* toast */
+.toast{
+  position:fixed;bottom:22px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:12px;padding:9px 16px;
+  font-size:.83rem;font-weight:500;
+  display:flex;align-items:center;gap:8px;
+  z-index:9999;transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 8px 30px rgba(0,0,0,.4);white-space:nowrap;
+}
+.toast.on{transform:translateX(-50%) translateY(0);}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--card);border-radius:100px;}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="landing">
+  <div class="brand">
+    <div class="brand-icon">🎙️</div>
+    <div>
+      <div class="brand-name">MüzikOda</div>
+      <div class="brand-tag">Arkadaşlarınla sesli konuş, müzik dinle</div>
+    </div>
+  </div>
+  <div class="lbox">
+    <div class="lbl">Yeni oda oluştur</div>
+    <div class="flds">
+      <input class="f" id="cn" placeholder="Adın" maxlength="20">
+      <input class="f" id="cr" placeholder="Oda adı (örn: gece-sohbet)" maxlength="28">
+      <button class="btn btn-p" onclick="createRoom()">✨ Oda Oluştur</button>
+    </div>
+    <div class="or">ya da</div>
+    <div class="lbl">Mevcut odaya katıl</div>
+    <div class="flds">
+      <input class="f" id="jn" placeholder="Adın" maxlength="20">
+      <input class="f" id="jr" placeholder="Oda adı" maxlength="28">
+      <button class="btn btn-s" onclick="joinRoom()">🚪 Katıl</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="t-brand">MüzikOda</div>
+      <div class="room-chip"><div class="dot"></div><span id="tb-room">oda</span></div>
+    </div>
+    <div class="t-right">
+      <button class="music-tog" id="mtog" onclick="toggleMusic()">🎵 Müzik</button>
+      <div class="me-chip">
+        <div class="av c0" id="me-av" style="width:26px;height:26px;font-size:.62rem;"></div>
+        <span id="tb-me">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- LEFT -->
+    <div class="left">
+      <div class="vcroom">
+        <div class="vch">
+          <div class="vct">🔊 Sesli Oda <span class="vcst" id="vcst">· bağlı değil</span></div>
+          <div class="vc-btns">
+            <button class="ib" id="mb" onclick="toggleMute()" title="Mikrofon">🎙️</button>
+            <button class="ib" id="vcb" onclick="toggleVoice()" title="Bağlan / Ayrıl">📞</button>
+          </div>
+        </div>
+        <div class="pgrid" id="pgrid"></div>
+      </div>
+      <div class="chat">
+        <div class="ch">💬 Sohbet</div>
+        <div class="msgs" id="msgs"></div>
+        <div class="cinput">
+          <input class="cf" id="cf" placeholder="Mesaj yaz..." maxlength="300" onkeydown="if(event.key==='Enter')send()">
+          <button class="sbtn" onclick="send()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: music -->
+    <div class="mpanel hide" id="mp">
+      <div class="mph">
+        <div class="mpt">
+          <div class="vizbar off" id="vz">
+            <div class="vb"></div><div class="vb"></div>
+            <div class="vb"></div><div class="vb"></div><div class="vb"></div>
+          </div>
+          Müzik
+        </div>
+      </div>
+
+      <div class="npcard">
+        <div class="npthumb">
+          <div class="npph" id="npph"><span style="font-size:1.8rem">🎬</span><span>YouTube linki ekle</span></div>
+          <iframe id="ytf" style="display:none" allow="autoplay;encrypted-media;fullscreen" allowfullscreen></iframe>
+        </div>
+        <div class="npinfo">
+          <div class="nptitle" id="nptitle">Şarkı seçilmedi</div>
+          <div class="npsub" id="npsub">Aşağıya link yapıştır</div>
+        </div>
+      </div>
+
+      <div class="mctrls">
+        <button class="mc" onclick="prev()">⏮</button>
+        <button class="mc main" id="pb" onclick="togPlay()">▶</button>
+        <button class="mc" onclick="next()">⏭</button>
+        <button class="mc" id="shb" onclick="togShuffle()">🔀</button>
+        <button class="mc" id="rpb" onclick="togRepeat()">🔁</button>
+      </div>
+
+      <div class="addsong">
+        <input class="af" id="yti" placeholder="YouTube linki yapıştır..." onkeydown="if(event.key==='Enter')addSong()">
+        <button class="abtn" onclick="addSong()">+ Ekle</button>
+      </div>
+
+      <div class="qhead"><span>Sıra</span><span id="qc" style="color:var(--accent)">0</span></div>
+      <div class="qlist" id="ql"><div style="text-align:center;color:var(--sub);font-size:.8rem;padding:18px 0">Henüz şarkı yok</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="ti"></span><span id="tt"></span></div>
+<div id="rau" style="display:none"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const S={me:'',room:'',queue:[],cur:-1,playing:false,shuffle:false,repeat:false,voiceOn:false,muted:false,peers:{}};
+let localStream=null,pcs={},socket=null;
+
+const COLS=['c0','c1','c2','c3','c4'];
+function col(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))%5;return COLS[h];}
+function ini(n){return n.slice(0,2).toUpperCase();}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// LANDING
+function createRoom(){
+  const n=document.getElementById('cn').value.trim();
+  const r=document.getElementById('cr').value.trim().toLowerCase().replace(/\s+/g,'-');
+  if(!n)return T('Adını gir!','❌');
+  if(!r)return T('Oda adı gir!','❌');
+  go(n,r,true);
+}
+function joinRoom(){
+  const n=document.getElementById('jn').value.trim();
+  let r=document.getElementById('jr').value.trim();
+  if(r.includes('#'))r=r.split('#').pop();
+  r=r.toLowerCase().replace(/\s+/g,'-');
+  if(!n)return T('Adını gir!','❌');
+  if(!r)return T('Oda adı gir!','❌');
+  go(n,r,false);
+}
+function go(name,room,creator){
+  S.me=name;S.room=room;
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').classList.add('on');
+  document.getElementById('tb-room').textContent=room;
+  document.getElementById('tb-me').textContent=name;
+  const av=document.getElementById('me-av');
+  av.textContent=ini(name);av.className=`av ${col(name)}`;
+  window.location.hash=room;
+  initSocket();
+  addP(name,true);
+  sys(`${name} odaya katıldı`);
+  T(creator?`"${room}" oluşturuldu 🎉`:`"${room}" odasına katıldın 🚀`,'✅');
+}
+
+// SOCKET.IO
+function initSocket(){
+  socket=io();
+
+  socket.emit('join',{room:S.room,name:S.me});
+
+  // Mevcut oda durumu (yeni katılımda)
+  socket.on('state',({users,queue,cur,playing})=>{
+    users.forEach(n=>{if(n!==S.me)addP(n,false);});
+    if(queue?.length){S.queue=queue;renderQ();if(cur>=0)loadT(cur,playing);}
+  });
+
+  socket.on('user-joined',({name})=>{addP(name,false);sys(`${name} katıldı`);});
+  socket.on('user-left',({name})=>{rmP(name);sys(`${name} ayrıldı`);});
+  socket.on('chat',({name,text})=>renderMsg(name,text,false));
+
+  socket.on('add-song',({song,from})=>{
+    if(!S.queue.find(s=>s.id===song.id)){
+      S.queue.push(song);renderQ();
+      T(`${from}: ${song.title.slice(0,22)}...`,'🎵');
+    }
+  });
+
+  socket.on('play',({cur})=>loadT(cur,true));
+  socket.on('pause',()=>rPause());
+  socket.on('speaking',({name,v})=>setSpk(name,v));
+
+  // WebRTC sinyalleri
+  socket.on('offer',({from,offer})=>handleOffer(from,offer));
+  socket.on('answer',({from,answer})=>handleAnswer(from,answer));
+  socket.on('ice',({from,candidate})=>handleIce(from,candidate));
+}
+
+function bc(type,data={}){ if(socket) socket.emit(type,data); }
+
+// MUSIC PANEL
+function toggleMusic(){
+  const p=document.getElementById('mp'),b=document.getElementById('mtog');
+  const h=p.classList.toggle('hide');
+  b.classList.toggle('on',!h);
+}
+
+// YOUTUBE
+function xid(url){const m=url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:null;}
+
+async function addSong(){
+  const inp=document.getElementById('yti');
+  const url=inp.value.trim();
+  if(!url)return T('YouTube linki gir!','❌');
+  const id=xid(url);
+  if(!id)return T('Geçersiz link!','❌');
+  if(S.queue.find(s=>s.id===id))return T('Zaten ekli!','⚠️');
+  const song={id,title:`YouTube: ${id}`,thumb:`https://img.youtube.com/vi/${id}/mqdefault.jpg`,by:S.me};
+  try{
+    const r=await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`);
+    if(r.ok){const d=await r.json();if(d.title)song.title=d.title;}
+  }catch(e){}
+  S.queue.push(song);inp.value='';
+  renderQ();bc('add-song',{song});
+  T(`Eklendi: ${song.title.slice(0,26)}...`,'✅');
+  if(S.cur===-1){S.cur=0;S.playing=true;}
+  else loadT(0,true);
+}
+
+function ytCmd(cmd){
+  const f=document.getElementById('ytf');
+  if(!f||f.style.display==='none')return;
+  f.contentWindow?.postMessage(JSON.stringify({event:'command',func:cmd,args:[]}),'*');
+}
+
+function loadT(i,play=true){
+  if(i<0||i>=S.queue.length)return;
+  S.cur=i;const s=S.queue[i];
+  document.getElementById('nptitle').textContent=s.title;
+  document.getElementById('npsub').textContent=`Ekleyen: ${s.by}`;
+  document.getElementById('npph').style.display='none';
+  const f=document.getElementById('ytf');
+  f.style.display='block';
+  // enablejsapi=1 → postMessage ile kontrol
+  // autoplay=1 + mute=1 başlatır, sonra unmute ederiz (tarayıcı politikası)
+  f.src=`https://www.youtube.com/embed/${s.id}?autoplay=1&mute=0&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin||'file://')}`;
+  S.playing=true;
+  // play=false istendiyse iframe yüklendikten sonra durdur
+  if(!play){
+    setTimeout(()=>ytCmd('pauseVideo'),1200);
+    S.playing=false;
+  }
+  updPB();
+  document.getElementById('vz').classList.toggle('off',!S.playing);
+  renderQ();
+}
+
+function togPlay(){
+  if(S.cur===-1){if(S.queue.length)loadT(0,true);return;}
+  S.playing=!S.playing;
+  ytCmd(S.playing?'playVideo':'pauseVideo');
+  updPB();
+  document.getElementById('vz').classList.toggle('off',!S.playing);
+  bc(S.playing?'play':'pause',{cur:S.cur});
+}
+
+function rPause(){
+  if(S.cur<0)return;
+  S.playing=false;
+  ytCmd('pauseVideo');
+  updPB();
+  document.getElementById('vz').classList.add('off');
+}
+function next(){if(!S.queue.length)return;let n=S.shuffle?Math.floor(Math.random()*S.queue.length):S.cur+1;if(n>=S.queue.length)n=S.repeat?0:-1;if(n>=0)loadT(n,true);}
+function prev(){if(!S.queue.length)return;loadT(Math.max(0,S.cur-1),S.playing);}
+function updPB(){document.getElementById('pb').textContent=S.playing?'⏸':'▶';}
+function togShuffle(){S.shuffle=!S.shuffle;document.getElementById('shb').style.color=S.shuffle?'var(--accent)':'';}
+function togRepeat(){S.repeat=!S.repeat;document.getElementById('rpb').style.color=S.repeat?'var(--accent)':'';}
+
+function renderQ(){
+  const el=document.getElementById('ql');
+  document.getElementById('qc').textContent=S.queue.length;
+  if(!S.queue.length){el.innerHTML='<div style="text-align:center;color:var(--sub);font-size:.8rem;padding:18px 0">Henüz şarkı yok</div>';return;}
+  el.innerHTML=S.queue.map((s,i)=>`
+    <div class="qi ${i===S.cur?'active':''}" onclick="loadT(${i},true)">
+      <div class="qthumb"><img src="${s.thumb}" onerror="this.style.display='none';this.parentNode.innerHTML='🎵'"></div>
+      <div class="qinfo"><div class="qtitle">${esc(s.title)}</div><div class="qby">${esc(s.by)}</div></div>
+      <button class="qdel" onclick="event.stopPropagation();delS(${i})">✕</button>
+    </div>`).join('');
+}
+function delS(i){S.queue.splice(i,1);if(S.cur>=S.queue.length)S.cur=S.queue.length-1;renderQ();}
+
+// VOICE
+async function toggleVoice(){
+  const b=document.getElementById('vcb'),st=document.getElementById('vcst');
+  if(!S.voiceOn){
+    try{
+      localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+      S.voiceOn=true;b.className='ib g';b.textContent='📞';
+      st.textContent='· bağlı';st.style.color='var(--green)';
+      setupVAD(localStream);upP(S.me,{micOn:true});
+      T('Ses kanalına bağlandın 🎙️','✅');
+    }catch(e){T('Mikrofon izni gerekli!','❌');}
+  } else {
+    localStream?.getTracks().forEach(t=>t.stop());localStream=null;
+    Object.values(pcs).forEach(p=>p.close());pcs={};
+    S.voiceOn=false;S.muted=false;
+    b.className='ib';b.textContent='📞';
+    document.getElementById('mb').className='ib';document.getElementById('mb').textContent='🎙️';
+    st.textContent='· bağlı değil';st.style.color='';
+    upP(S.me,{micOn:false,speaking:false});T('Ses kanalından ayrıldın','ℹ️');
+  }
+}
+function toggleMute(){
+  if(!S.voiceOn)return;S.muted=!S.muted;
+  localStream?.getAudioTracks().forEach(t=>t.enabled=!S.muted);
+  const b=document.getElementById('mb');
+  b.className=S.muted?'ib r':'ib';b.textContent=S.muted?'🔇':'🎙️';
+  T(S.muted?'Mikrofon kapalı 🔇':'Mikrofon açık 🎙️','ℹ️');
+}
+function setupVAD(stream){
+  try{
+    const ctx=new AudioContext(),an=ctx.createAnalyser();an.fftSize=256;
+    ctx.createMediaStreamSource(stream).connect(an);
+    const buf=new Uint8Array(an.frequencyBinCount);let spk=false;
+    setInterval(()=>{
+      an.getByteFrequencyData(buf);
+      const v=buf.reduce((a,b)=>a+b,0)/buf.length,now=v>18;
+      if(now!==spk){spk=now;setSpk(S.me,spk);bc('speaking',{v:spk});}
+    },120);
+  }catch(e){}
+}
+async function handleOffer(from,offer){
+  if(!localStream)return;
+  const pc=mkPc(from);
+  await pc.setRemoteDescription(new RTCSessionDescription(offer));
+  const a=await pc.createAnswer();
+  await pc.setLocalDescription(a);
+  bc('answer',{to:from,answer:a});
+}
+async function handleAnswer(from,answer){await pcs[from]?.setRemoteDescription(new RTCSessionDescription(answer));}
+async function handleIce(from,candidate){await pcs[from]?.addIceCandidate(new RTCIceCandidate(candidate));}
+function mkPc(pid){
+  const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+  pcs[pid]=pc;localStream?.getTracks().forEach(t=>pc.addTrack(t,localStream));
+  pc.ontrack=e=>{const a=document.createElement('audio');a.autoplay=true;a.srcObject=e.streams[0];document.getElementById('rau').appendChild(a);};
+  pc.onicecandidate=e=>{if(e.candidate)bc('ice',{to:pid,candidate:e.candidate});};
+  return pc;
+}
+
+// PEERS
+function addP(name,isMe){S.peers[name]={name,isMe,speaking:false,micOn:false};renderP();}
+function rmP(name){delete S.peers[name];renderP();}
+function upP(name,d){if(S.peers[name])Object.assign(S.peers[name],d);renderP();}
+function setSpk(name,v){if(S.peers[name]){S.peers[name].speaking=v;renderP();}}
+function renderP(){
+  const el=document.getElementById('pgrid'),list=Object.values(S.peers);
+  if(!list.length){el.innerHTML='';return;}
+  el.innerHTML=list.map(p=>`
+    <div class="pcard ${p.speaking?'spk':''}">
+      <div class="p-av-wrap">
+        <div class="av ${col(p.name)}" style="width:44px;height:44px;font-size:.85rem;">${ini(p.name)}</div>
+        <div class="pring"></div>
+      </div>
+      <div class="pname">${esc(p.name)}${p.isMe?' (sen)':''}</div>
+      <div class="pmic">${p.speaking?'🗣️':p.micOn?'🎙️':'🔇'}</div>
+    </div>`).join('');
+}
+
+// CHAT
+function send(){
+  const f=document.getElementById('cf'),t=f.value.trim();if(!t)return;
+  f.value='';renderMsg(S.me,t,true);bc('chat',{text:t});
+}
+function renderMsg(from,text,isOwn){
+  const el=document.getElementById('msgs'),d=document.createElement('div');
+  d.className='msg';
+  d.innerHTML=`
+    <div class="av ${col(from)}" style="width:28px;height:28px;font-size:.62rem;flex-shrink:0;margin-top:1px;">${ini(from)}</div>
+    <div class="mbody">
+      <div class="mwho" style="color:${isOwn?'var(--accent)':'var(--sub)'}">${esc(from)}</div>
+      <div class="mtxt">${esc(text)}</div>
+    </div>`;
+  el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+function sys(t){
+  const el=document.getElementById('msgs'),d=document.createElement('div');
+  d.className='msg sys';d.textContent=t;el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+
+// TOAST
+function T(text,icon='ℹ️'){
+  document.getElementById('ti').textContent=icon;
+  document.getElementById('tt').textContent=text;
+  const t=document.getElementById('toast');
+  t.classList.add('on');clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('on'),3000);
+}
+
+window.addEventListener('load',()=>{const h=location.hash.slice(1);if(h)document.getElementById('jr').value=h;});
+</script>
+</body>
+</html>
