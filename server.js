@@ -20,8 +20,9 @@ function getRoom(roomId) {
       queue: [],
       cur: -1,
       playing: false,
-      position: 0,      // son bilinen pozisyon (saniye)
-      posTimestamp: 0,  // o pozisyonun kaydedildiği zaman (Date.now())
+      position: 0,
+      posTimestamp: 0,
+      pass: '',
     };
   }
   return rooms[roomId];
