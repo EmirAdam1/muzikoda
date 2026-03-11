@@ -429,11 +429,13 @@ body{
   </div>
 
   <div class="lbox">
+    <!-- Tarayıcı şifre yöneticisini engelle -->
+    <input type="password" style="display:none" aria-hidden="true">
     <div class="lbl">Yeni oda oluştur</div>
     <div class="flds">
       <input class="f" id="cn" placeholder="Adın" maxlength="20" autocomplete="off">
       <input class="f" id="cr" placeholder="Oda adı (örn: gece-sohbet)" maxlength="28" autocomplete="off">
-      <input class="f" id="cp" placeholder="Şifre (isteğe bağlı)" maxlength="32" type="text" autocomplete="new-password" onfocus="this.type='password'" style="-webkit-text-security:disc;">
+      <input class="f" id="cp" placeholder="Şifre (isteğe bağlı)" maxlength="32" type="password" autocomplete="off" data-lpignore="true" data-form-type="other">
       <button class="btn btn-p" onclick="createRoom()">✨ Oda Oluştur</button>
     </div>
     <div class="or">ya da</div>
@@ -441,7 +443,7 @@ body{
     <div class="flds">
       <input class="f" id="jn" placeholder="Adın" maxlength="20" autocomplete="off">
       <input class="f" id="jr" placeholder="Oda adı" maxlength="28" autocomplete="off">
-      <input class="f" id="jp" placeholder="Şifre (varsa)" maxlength="32" type="text" autocomplete="new-password" onfocus="this.type='password'" style="-webkit-text-security:disc;">
+      <input class="f" id="jp" placeholder="Şifre (varsa)" maxlength="32" type="password" autocomplete="off" data-lpignore="true" data-form-type="other">
       <button class="btn btn-s" onclick="joinRoom()">🚪 Katıl</button>
     </div>
   </div>
@@ -640,6 +642,9 @@ function updFavBtn(){
   btn.classList.toggle('on', isFav);
   btn.textContent = isFav ? '★' : '☆';
 }
+
+// LANDING
+function createRoom(){
   const n=document.getElementById('cn').value.trim();
   const r=document.getElementById('cr').value.trim().toLowerCase().replace(/\s+/g,'-');
   const p=document.getElementById('cp').value.trim();
