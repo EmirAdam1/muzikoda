@@ -36,12 +36,23 @@ function getCurrentPosition(r) {
 
 io.on('connection', (socket) => {
 
-  socket.on('join', ({ room, name }) => {
+  socket.on('join', ({ room, name, pass }) => {
     socket.join(room);
     socket.data.room = room;
     socket.data.name = name;
 
     const r = getRoom(room);
+
+    // Şifre kontrolü
+    if(r.pass && r.pass !== (pass||'')) {
+      socket.emit('wrong-pass');
+      socket.leave(room);
+      socket.data.room = null;
+      return;
+    }
+    // Oda yeni oluşturuluyorsa şifreyi kaydet
+    if(!r.pass && pass) r.pass = pass;
+
     r.users[socket.id] = { name };
 
     socket.emit('state', {
