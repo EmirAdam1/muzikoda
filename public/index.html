@@ -372,7 +372,22 @@ body{
 .qi:hover .qdel{opacity:1;}
 .qdel:hover{color:var(--red);background:rgba(240,92,92,.1);}
 
-/* avatar colors */
+/* favorites */
+.fav-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:12px;padding:10px 14px;
+  cursor:pointer;transition:all .15s;
+}
+.fav-item:hover{border-color:var(--accent);background:rgba(91,106,245,.08);}
+.fav-icon{font-size:1.2rem;flex-shrink:0;}
+.fav-info{flex:1;overflow:hidden;}
+.fav-name{font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fav-meta{font-size:.72rem;color:var(--sub);margin-top:2px;}
+.fav-del{background:none;border:none;color:var(--sub);cursor:pointer;font-size:.85rem;padding:4px;border-radius:6px;flex-shrink:0;transition:all .15s;}
+.fav-del:hover{color:var(--red);background:rgba(240,92,92,.1);}
+.fav-enter{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:.78rem;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .15s;}
+.fav-enter:hover{background:#4a59e8;}
 .c0{background:linear-gradient(135deg,#5b6af5,#8b5cf6);}
 .c1{background:linear-gradient(135deg,#3ecf8e,#3eb5cf);}
 .c2{background:linear-gradient(135deg,#f05c5c,#f59642);}
@@ -406,11 +421,19 @@ body{
       <div class="brand-tag">Arkadaşlarınla sesli konuş, müzik dinle</div>
     </div>
   </div>
+
+  <!-- Favoriler -->
+  <div id="fav-box" style="display:none;width:100%;max-width:400px;">
+    <div class="lbl" style="margin-bottom:8px;">⭐ Favori Odalar</div>
+    <div id="fav-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+  </div>
+
   <div class="lbox">
     <div class="lbl">Yeni oda oluştur</div>
     <div class="flds">
       <input class="f" id="cn" placeholder="Adın" maxlength="20">
       <input class="f" id="cr" placeholder="Oda adı (örn: gece-sohbet)" maxlength="28">
+      <input class="f" id="cp" placeholder="Şifre (isteğe bağlı)" maxlength="32" type="password">
       <button class="btn btn-p" onclick="createRoom()">✨ Oda Oluştur</button>
     </div>
     <div class="or">ya da</div>
@@ -418,6 +441,7 @@ body{
     <div class="flds">
       <input class="f" id="jn" placeholder="Adın" maxlength="20">
       <input class="f" id="jr" placeholder="Oda adı" maxlength="28">
+      <input class="f" id="jp" placeholder="Şifre (varsa)" maxlength="32" type="password">
       <button class="btn btn-s" onclick="joinRoom()">🚪 Katıl</button>
     </div>
   </div>
@@ -431,6 +455,7 @@ body{
       <div class="room-chip"><div class="dot"></div><span id="tb-room">oda</span></div>
     </div>
     <div class="t-right">
+      <button class="music-tog" id="fav-btn" onclick="toggleFav()" title="Favoriye ekle/çıkar">⭐</button>
       <button class="music-tog" id="mtog" onclick="toggleMusic()">🎵 Müzik</button>
       <div class="me-chip">
         <div class="av c0" id="me-av" style="width:26px;height:26px;font-size:.62rem;"></div>
@@ -545,7 +570,7 @@ body{
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-const S={me:'',room:'',queue:[],cur:-1,playing:false,shuffle:false,repeat:false,voiceOn:false,muted:false,peers:{},volume:80};
+const S={me:'',room:'',queue:[],cur:-1,playing:false,shuffle:false,repeat:false,voiceOn:false,muted:false,peers:{},volume:80,pass:''};
 let localStream=null,pcs={},socket=null;
 
 const COLS=['c0','c1','c2','c3','c4'];
@@ -553,44 +578,113 @@ function col(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))%5;return COLS[h]
 function ini(n){return n.slice(0,2).toUpperCase();}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-// LANDING
-function createRoom(){
+// Favorileri sayfa açılınca yükle
+window.addEventListener('DOMContentLoaded', ()=>{ renderFavs(); });
+
+// ── FAVORİLER ──
+function getFavs(){ try{ return JSON.parse(localStorage.getItem('mo_favs')||'[]'); }catch(e){ return []; } }
+function saveFavs(f){ localStorage.setItem('mo_favs', JSON.stringify(f)); }
+
+function renderFavs(){
+  const favs = getFavs();
+  const box = document.getElementById('fav-box');
+  const list = document.getElementById('fav-list');
+  if(!favs.length){ box.style.display='none'; return; }
+  box.style.display='block';
+  list.innerHTML = favs.map((f,i)=>`
+    <div class="fav-item" onclick="quickJoin(${i})">
+      <div class="fav-icon">🏠</div>
+      <div class="fav-info">
+        <div class="fav-name">${esc(f.room)}</div>
+        <div class="fav-meta">${f.pass?'🔒 Şifreli':'🔓 Açık'} · ${esc(f.name)} olarak</div>
+      </div>
+      <button class="fav-enter" onclick="event.stopPropagation();quickJoin(${i})">Gir →</button>
+      <button class="fav-del" onclick="event.stopPropagation();delFav(${i})" title="Favoriden çıkar">✕</button>
+    </div>`).join('');
+}
+
+function quickJoin(i){
+  const favs = getFavs();
+  const f = favs[i];
+  if(!f) return;
+  go(f.name, f.room, false, f.pass||'');
+}
+
+function delFav(i){
+  const favs = getFavs();
+  favs.splice(i,1);
+  saveFavs(favs);
+  renderFavs();
+}
+
+function toggleFav(){
+  const favs = getFavs();
+  const idx = favs.findIndex(f=>f.room===S.room);
+  if(idx>=0){
+    favs.splice(idx,1);
+    saveFavs(favs);
+    document.getElementById('fav-btn').classList.remove('on');
+    T('Favorilerden çıkarıldı','⭐');
+  } else {
+    favs.unshift({room:S.room, name:S.me, pass:S.pass||''});
+    saveFavs(favs);
+    document.getElementById('fav-btn').classList.add('on');
+    T('Favorilere eklendi! ⭐','✅');
+  }
+}
+
+function updFavBtn(){
+  const favs = getFavs();
+  const isFav = favs.some(f=>f.room===S.room);
+  const btn = document.getElementById('fav-btn');
+  btn.classList.toggle('on', isFav);
+  btn.textContent = isFav ? '★' : '☆';
+}
   const n=document.getElementById('cn').value.trim();
   const r=document.getElementById('cr').value.trim().toLowerCase().replace(/\s+/g,'-');
+  const p=document.getElementById('cp').value.trim();
   if(!n)return T('Adını gir!','❌');
   if(!r)return T('Oda adı gir!','❌');
-  go(n,r,true);
+  go(n,r,true,p);
 }
 function joinRoom(){
   const n=document.getElementById('jn').value.trim();
   let r=document.getElementById('jr').value.trim();
+  const p=document.getElementById('jp').value.trim();
   if(r.includes('#'))r=r.split('#').pop();
   r=r.toLowerCase().replace(/\s+/g,'-');
   if(!n)return T('Adını gir!','❌');
   if(!r)return T('Oda adı gir!','❌');
-  go(n,r,false);
+  go(n,r,false,p);
 }
-function go(name,room,creator){
-  S.me=name;S.room=room;
+function go(name,room,creator,pass=''){
+  S.me=name; S.room=room; S.pass=pass;
   document.getElementById('landing').style.display='none';
   document.getElementById('app').classList.add('on');
   document.getElementById('tb-room').textContent=room;
   document.getElementById('tb-me').textContent=name;
   const av=document.getElementById('me-av');
-  av.textContent=ini(name);av.className=`av ${col(name)}`;
+  av.textContent=ini(name); av.className=`av ${col(name)}`;
   window.location.hash=room;
   initSocket();
   addP(name,true);
   sys(`${name} odaya katıldı`);
   T(creator?`"${room}" oluşturuldu 🎉`:`"${room}" odasına katıldın 🚀`,'✅');
   updateQuotaUI();
+  updFavBtn();
 }
 
 // SOCKET.IO
 function initSocket(){
   socket=io();
 
-  socket.emit('join',{room:S.room,name:S.me});
+  socket.emit('join',{room:S.room, name:S.me, pass:S.pass||''});
+
+  socket.on('wrong-pass',()=>{
+    T('Şifre yanlış!','❌');
+    document.getElementById('app').classList.remove('on');
+    document.getElementById('landing').style.display='flex';
+  });
 
   // Mevcut oda durumu (yeni katılımda)
   socket.on('state',({users,queue,cur,playing,position,serverTime})=>{
