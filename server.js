@@ -49,7 +49,8 @@ io.on('connection', (socket) => {
       queue: r.queue,
       cur: r.cur,
       playing: r.playing,
-      position: getCurrentPosition(r), // güncel pozisyon
+      position: getCurrentPosition(r),
+      serverTime: Date.now(),
     });
 
     socket.to(room).emit('user-joined', { name });
@@ -73,7 +74,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Play — pozisyon ile birlikte
+  // Play — pozisyon + sunucu zamanı ile birlikte
   socket.on('play', ({ cur, position }) => {
     const { room } = socket.data;
     if (!room) return;
@@ -82,10 +83,11 @@ io.on('connection', (socket) => {
     r.playing = true;
     r.position = position || 0;
     r.posTimestamp = Date.now();
-    socket.to(room).emit('play', { cur, position: r.position });
+    // serverTime ekle — alıcı gecikmeyi hesaplayabilsin
+    socket.to(room).emit('play', { cur, position: r.position, serverTime: r.posTimestamp });
   });
 
-  // Pause — pozisyon ile birlikte
+  // Pause — pozisyon + sunucu zamanı
   socket.on('pause', ({ position }) => {
     const { room } = socket.data;
     if (!room) return;
@@ -93,10 +95,10 @@ io.on('connection', (socket) => {
     r.playing = false;
     r.position = position || getCurrentPosition(r);
     r.posTimestamp = Date.now();
-    socket.to(room).emit('pause', { position: r.position });
+    socket.to(room).emit('pause', { position: r.position, serverTime: r.posTimestamp });
   });
 
-  // Seek — pozisyon değişti
+  // Seek
   socket.on('seek', ({ position, cur }) => {
     const { room } = socket.data;
     if (!room) return;
@@ -104,7 +106,7 @@ io.on('connection', (socket) => {
     r.position = position;
     r.posTimestamp = Date.now();
     r.cur = cur;
-    socket.to(room).emit('seek', { position, cur });
+    socket.to(room).emit('seek', { position, cur, serverTime: r.posTimestamp });
   });
 
   socket.on('voice-join', () => {
