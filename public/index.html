@@ -216,31 +216,72 @@ body{
 @keyframes vba{from{transform:scaleY(.25);}to{transform:scaleY(1);}}
 .vizbar.off .vb{animation-play-state:paused;transform:scaleY(.25);opacity:.3;}
 
-/* np card */
-.npcard{
-  margin:12px;background:var(--card);
-  border:1px solid var(--border);border-radius:var(--r);overflow:hidden;
+/* np hero */
+.np-hero{
+  margin:12px;border-radius:var(--r);overflow:hidden;
+  background:var(--card);border:1px solid var(--border);
+  position:relative;aspect-ratio:16/9;flex-shrink:0;
 }
-.npthumb{width:100%;aspect-ratio:16/9;background:#000;position:relative;overflow:hidden;}
-.npthumb iframe{width:100%;height:100%;border:none;display:block;}
-.npph{
+.np-hero-ph{
   width:100%;height:100%;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:7px;color:var(--sub);font-size:.8rem;background:var(--bg);
+  gap:8px;color:var(--sub);font-size:.82rem;
 }
-.npinfo{padding:10px 12px 12px;}
-.nptitle{font-size:.87rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
-.npsub{font-size:.72rem;color:var(--sub);}
+.np-hero-overlay{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));
+  padding:24px 12px 10px;
+}
+.np-hero-title{font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.np-hero-sub{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:2px;}
+
+/* progress */
+.prog-wrap{padding:4px 14px 0;}
+.prog-bar{
+  height:4px;background:var(--hover);border-radius:100px;
+  cursor:pointer;position:relative;overflow:hidden;
+}
+.prog-fill{
+  height:100%;background:linear-gradient(90deg,var(--accent),#8b5cf6);
+  border-radius:100px;width:0%;transition:width .5s linear;
+}
+.prog-times{
+  display:flex;justify-content:space-between;
+  font-size:.68rem;color:var(--sub);margin-top:4px;
+}
+
+/* volume */
+.vol-row{
+  display:flex;align-items:center;gap:8px;
+  padding:4px 14px 8px;
+}
+.vol-icon{font-size:.9rem;cursor:pointer;flex-shrink:0;}
+.vol-slider{
+  flex:1;height:4px;
+  -webkit-appearance:none;appearance:none;
+  background:var(--hover);border-radius:100px;outline:none;cursor:pointer;
+}
+.vol-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--accent);cursor:pointer;
+  box-shadow:0 0 6px rgba(91,106,245,.5);
+}
+.vol-slider::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;border:none;
+  background:var(--accent);cursor:pointer;
+}
+.vol-val{font-size:.72rem;color:var(--sub);width:24px;text-align:right;flex-shrink:0;}
 
 /* controls */
-.mctrls{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 12px 12px;flex-shrink:0;}
+.mctrls{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 12px 4px;flex-shrink:0;}
 .mc{background:none;border:none;color:var(--sub);cursor:pointer;font-size:1rem;padding:6px;border-radius:8px;transition:all .15s;}
 .mc:hover{color:var(--text);background:var(--card);}
 .mc.main{
   background:var(--accent);color:#fff;
-  width:36px;height:36px;border-radius:50%;
+  width:38px;height:38px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 3px 12px rgba(91,106,245,.4);font-size:.9rem;
+  box-shadow:0 3px 12px rgba(91,106,245,.4);font-size:.95rem;
 }
 .mc.main:hover{background:#4a59e8;}
 
@@ -392,27 +433,55 @@ body{
           </div>
           Müzik
         </div>
+        <div style="font-size:.7rem;color:var(--sub);font-weight:600;" id="sync-label"></div>
       </div>
 
-      <div class="npcard">
-        <div class="npthumb">
-          <div class="npph" id="npph"><span style="font-size:1.8rem">🎬</span><span>YouTube linki ekle</span></div>
-          <iframe id="ytf" style="display:none" allow="autoplay;encrypted-media;fullscreen" allowfullscreen></iframe>
+      <!-- Thumbnail + title -->
+      <div class="np-hero" id="np-hero">
+        <div class="np-hero-ph" id="npph">
+          <span style="font-size:2rem">🎵</span>
+          <span>YouTube linki ekle</span>
         </div>
-        <div class="npinfo">
-          <div class="nptitle" id="nptitle">Şarkı seçilmedi</div>
-          <div class="npsub" id="npsub">Aşağıya link yapıştır</div>
+        <img id="np-thumb-img" style="display:none;width:100%;height:100%;object-fit:cover;" src="">
+        <div class="np-hero-overlay" id="np-overlay" style="display:none">
+          <div class="np-hero-title" id="nptitle">—</div>
+          <div class="np-hero-sub" id="npsub">—</div>
         </div>
       </div>
 
+      <!-- Video (gizli, sadece ses için) -->
+      <iframe id="ytf" style="display:none;width:1px;height:1px;position:absolute;opacity:0;pointer-events:none;"
+        allow="autoplay;encrypted-media" allowfullscreen></iframe>
+
+      <!-- Progress bar -->
+      <div class="prog-wrap">
+        <div class="prog-bar" id="prog-bar">
+          <div class="prog-fill" id="prog-fill"></div>
+        </div>
+        <div class="prog-times">
+          <span id="t-cur">0:00</span>
+          <span id="t-dur">0:00</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
       <div class="mctrls">
+        <button class="mc" id="shb" onclick="togShuffle()" title="Karıştır">🔀</button>
         <button class="mc" onclick="prev()">⏮</button>
         <button class="mc main" id="pb" onclick="togPlay()">▶</button>
         <button class="mc" onclick="next()">⏭</button>
-        <button class="mc" id="shb" onclick="togShuffle()">🔀</button>
-        <button class="mc" id="rpb" onclick="togRepeat()">🔁</button>
+        <button class="mc" id="rpb" onclick="togRepeat()" title="Tekrarla">🔁</button>
       </div>
 
+      <!-- Volume -->
+      <div class="vol-row">
+        <span class="vol-icon" id="vol-icon">🔊</span>
+        <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="80"
+          oninput="setVol(this.value)">
+        <span class="vol-val" id="vol-val">80</span>
+      </div>
+
+      <!-- Add song -->
       <div class="addsong">
         <input class="af" id="yti" placeholder="YouTube linki yapıştır..." onkeydown="if(event.key==='Enter')addSong()">
         <button class="abtn" onclick="addSong()">+ Ekle</button>
@@ -429,7 +498,7 @@ body{
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-const S={me:'',room:'',queue:[],cur:-1,playing:false,shuffle:false,repeat:false,voiceOn:false,muted:false,peers:{}};
+const S={me:'',room:'',queue:[],cur:-1,playing:false,shuffle:false,repeat:false,voiceOn:false,muted:false,peers:{},volume:80};
 let localStream=null,pcs={},socket=null;
 
 const COLS=['c0','c1','c2','c3','c4'];
@@ -534,40 +603,40 @@ async function addSong(){
   S.queue.push(song);inp.value='';
   renderQ();bc('add-song',{song});
   T(`Eklendi: ${song.title.slice(0,26)}...`,'✅');
-  if(S.cur===-1){S.cur=0;S.playing=true;}
-  else loadT(0,true);
+  if(S.cur===-1){loadT(0,true);bc('play',{cur:0});}
 }
 
-function ytCmd(cmd){
+function ytCmd(func,args=[]){
   const f=document.getElementById('ytf');
-  if(!f||f.style.display==='none')return;
-  f.contentWindow?.postMessage(JSON.stringify({event:'command',func:cmd,args:[]}),'*');
+  if(!f)return;
+  f.contentWindow?.postMessage(JSON.stringify({event:'command',func,args}),'*');
 }
 
 function loadT(i,play=true){
   if(i<0||i>=S.queue.length)return;
   S.cur=i;const s=S.queue[i];
+
+  // Hero görseli güncelle
+  document.getElementById('npph').style.display='none';
+  const img=document.getElementById('np-thumb-img');
+  img.src=s.thumb;img.style.display='block';
+  document.getElementById('np-overlay').style.display='block';
   document.getElementById('nptitle').textContent=s.title;
   document.getElementById('npsub').textContent=`Ekleyen: ${s.by}`;
-  document.getElementById('npph').style.display='none';
+
+  // iframe (gizli, sadece ses için)
   const f=document.getElementById('ytf');
-  f.style.display='block';
-  // enablejsapi=1 → postMessage ile kontrol
-  // autoplay=1 + mute=1 başlatır, sonra unmute ederiz (tarayıcı politikası)
-  f.src=`https://www.youtube.com/embed/${s.id}?autoplay=1&mute=0&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin||'file://')}`;
-  S.playing=true;
-  // play=false istendiyse iframe yüklendikten sonra durdur
-  if(!play){
-    setTimeout(()=>ytCmd('pauseVideo'),1200);
-    S.playing=false;
-  }
+  f.src=`https://www.youtube.com/embed/${s.id}?autoplay=${play?1:0}&enablejsapi=1&origin=${location.origin}&rel=0&modestbranding=1`;
+  S.playing=play;
   updPB();
-  document.getElementById('vz').classList.toggle('off',!S.playing);
+  document.getElementById('vz').classList.toggle('off',!play);
   renderQ();
+  // Ses seviyesini uygula
+  setTimeout(()=>ytCmd('setVolume',[S.volume]),1500);
 }
 
 function togPlay(){
-  if(S.cur===-1){if(S.queue.length)loadT(0,true);return;}
+  if(S.cur===-1){if(S.queue.length){loadT(0,true);bc('play',{cur:0});}return;}
   S.playing=!S.playing;
   ytCmd(S.playing?'playVideo':'pauseVideo');
   updPB();
@@ -582,8 +651,27 @@ function rPause(){
   updPB();
   document.getElementById('vz').classList.add('off');
 }
-function next(){if(!S.queue.length)return;let n=S.shuffle?Math.floor(Math.random()*S.queue.length):S.cur+1;if(n>=S.queue.length)n=S.repeat?0:-1;if(n>=0)loadT(n,true);}
-function prev(){if(!S.queue.length)return;loadT(Math.max(0,S.cur-1),S.playing);}
+
+function setVol(v){
+  S.volume=parseInt(v);
+  document.getElementById('vol-val').textContent=v;
+  const icon=document.getElementById('vol-icon');
+  icon.textContent=v==0?'🔇':v<50?'🔉':'🔊';
+  ytCmd('setVolume',[S.volume]);
+}
+
+function next(){
+  if(!S.queue.length)return;
+  let n=S.shuffle?Math.floor(Math.random()*S.queue.length):S.cur+1;
+  if(n>=S.queue.length)n=S.repeat?0:-1;
+  if(n>=0){loadT(n,true);bc('play',{cur:n});}
+}
+function prev(){
+  if(!S.queue.length)return;
+  const p=Math.max(0,S.cur-1);
+  loadT(p,S.playing);
+  bc(S.playing?'play':'pause',{cur:p});
+}
 function updPB(){document.getElementById('pb').textContent=S.playing?'⏸':'▶';}
 function togShuffle(){S.shuffle=!S.shuffle;document.getElementById('shb').style.color=S.shuffle?'var(--accent)':'';}
 function togRepeat(){S.repeat=!S.repeat;document.getElementById('rpb').style.color=S.repeat?'var(--accent)':'';}
@@ -593,7 +681,7 @@ function renderQ(){
   document.getElementById('qc').textContent=S.queue.length;
   if(!S.queue.length){el.innerHTML='<div style="text-align:center;color:var(--sub);font-size:.8rem;padding:18px 0">Henüz şarkı yok</div>';return;}
   el.innerHTML=S.queue.map((s,i)=>`
-    <div class="qi ${i===S.cur?'active':''}" onclick="loadT(${i},true)">
+    <div class="qi ${i===S.cur?'active':''}" onclick="loadT(${i},true);bc('play',{cur:${i}})">
       <div class="qthumb"><img src="${s.thumb}" onerror="this.style.display='none';this.parentNode.innerHTML='🎵'"></div>
       <div class="qinfo"><div class="qtitle">${esc(s.title)}</div><div class="qby">${esc(s.by)}</div></div>
       <button class="qdel" onclick="event.stopPropagation();delS(${i})">✕</button>
