@@ -286,8 +286,27 @@ body{
 }
 .mc.main:hover{background:#4a59e8;}
 
-/* add */
-.addsong{margin:0 12px;display:flex;gap:6px;}
+.sresults{
+  margin:0 12px 6px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;
+  max-height:220px;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:var(--hover) transparent;
+}
+.sr{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;cursor:pointer;transition:background .1s;
+  border-bottom:1px solid var(--border);
+}
+.sr:last-child{border-bottom:none;}
+.sr:hover{background:var(--hover);}
+.sr-thumb{width:46px;height:34px;border-radius:5px;object-fit:cover;flex-shrink:0;background:var(--hover);}
+.sr-info{flex:1;overflow:hidden;}
+.sr-title{font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sr-ch{font-size:.68rem;color:var(--sub);margin-top:1px;}
+.sr-add{background:var(--accent);color:#fff;border:none;border-radius:6px;
+  padding:4px 9px;font-size:.72rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+.sr-add:hover{background:#4a59e8;}
 .af{
   flex:1;background:var(--card);border:1px solid var(--border);
   border-radius:9px;padding:8px 11px;
@@ -481,11 +500,14 @@ body{
         <span class="vol-val" id="vol-val">80</span>
       </div>
 
-      <!-- Add song -->
+
+      <!-- Add song / Search -->
       <div class="addsong">
-        <input class="af" id="yti" placeholder="YouTube şarkı veya playlist linki..." onkeydown="if(event.key==='Enter')addSong()">
-        <button class="abtn" id="addbtn" onclick="addSong()">+ Ekle</button>
+        <input class="af" id="yti" placeholder="Şarkı adı veya YouTube/playlist linki..." onkeydown="handleYtiKey(event)">
+        <button class="abtn" id="addbtn" onclick="handleAdd()">🔍</button>
       </div>
+      <!-- Arama sonuçları -->
+      <div class="sresults" id="sresults" style="display:none"></div>
 
       <div class="qhead"><span>Sıra</span><span id="qc" style="color:var(--accent)">0</span></div>
       <div class="qlist" id="ql"><div style="text-align:center;color:var(--sub);font-size:.8rem;padding:18px 0">Henüz şarkı yok</div></div>
@@ -622,44 +644,106 @@ function toggleMuteVol(){
 // YouTube Data API v3
 const YT_API_KEY = 'AIzaSyCO8jzJYebvvDs1Hg6ADGTs75FaAlZsaSk';
 
-// YouTube playlist ID çıkar
-function xplaylist(url){
-  const m = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
-  return m ? m[1] : null;
+// YouTube link yardımcıları
+function xid(url){const m=url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:null;}
+function xplaylist(url){const m=url.match(/[?&]list=([a-zA-Z0-9_-]+)/);return m?m[1]:null;}
+
+// Link mi yoksa arama mı?
+function isUrl(str){ return str.startsWith('http')||str.includes('youtu'); }
+
+function handleYtiKey(e){
+  if(e.key==='Enter') handleAdd();
+  else { closeSR(); }
 }
 
-// YOUTUBE
-function xid(url){const m=url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:null;}
-
-async function addSong(){
+async function handleAdd(){
   const inp = document.getElementById('yti');
-  const url = inp.value.trim();
-  if(!url) return T('YouTube linki gir!','❌');
+  const val = inp.value.trim();
+  if(!val) return T('Bir şey yaz!','❌');
 
-  const playlistId = xplaylist(url);
-
-  // Playlist mi? (tekli video linki değilse)
-  if(playlistId && !xid(url)){
-    await addPlaylist(playlistId);
-    inp.value = '';
-    return;
+  if(isUrl(val)){
+    // Link → eski mantık
+    const playlistId = xplaylist(val);
+    if(playlistId && !xid(val)){ await addPlaylist(playlistId); inp.value=''; return; }
+    const id = xid(val);
+    if(!id) return T('Geçersiz link!','❌');
+    await addSongById(id);
+    inp.value='';
+  } else {
+    // İsim → YouTube'da ara
+    await searchYT(val);
   }
+}
 
-  // Tekli şarkı
-  const id = xid(url);
-  if(!id) return T('Geçersiz link!','❌');
+function closeSR(){
+  const el = document.getElementById('sresults');
+  el.style.display='none'; el.innerHTML='';
+}
+
+async function searchYT(q){
+  const btn = document.getElementById('addbtn');
+  btn.textContent='⏳'; btn.disabled=true;
+  const el = document.getElementById('sresults');
+
+  try{
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=8&type=video,playlist&q=${encodeURIComponent(q)}&key=${YT_API_KEY}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if(data.error){ T('Arama hatası: '+data.error.message,'❌'); return; }
+    if(!data.items?.length){ T('Sonuç bulunamadı','❌'); return; }
+
+    el.innerHTML = data.items.map(item=>{
+      const isPlaylist = item.id.kind === 'youtube#playlist';
+      const id = isPlaylist ? item.id.playlistId : item.id.videoId;
+      const title = item.snippet.title;
+      const ch = item.snippet.channelTitle;
+      const thumb = item.snippet.thumbnails?.default?.url || '';
+      const label = isPlaylist ? '+ Playlist' : '+ Ekle';
+      const type = isPlaylist ? 'playlist' : 'video';
+      return `<div class="sr">
+        <img class="sr-thumb" src="${thumb}" onerror="this.style.display='none'">
+        <div class="sr-info">
+          <div class="sr-title">${esc(title)}</div>
+          <div class="sr-ch">${isPlaylist?'🎵 Playlist · ':''}${esc(ch)}</div>
+        </div>
+        <button class="sr-add" onclick="addFromSearch('${id}','${type}',this)">${label}</button>
+      </div>`;
+    }).join('');
+
+    el.style.display='block';
+  }catch(e){
+    T('Arama başarısız!','❌');
+  } finally {
+    btn.textContent='🔍'; btn.disabled=false;
+  }
+}
+
+async function addFromSearch(id, type, btn){
+  btn.textContent='✅'; btn.disabled=true;
+  if(type==='playlist'){
+    await addPlaylist(id);
+  } else {
+    await addSongById(id);
+  }
+}
+
+async function addSongById(id){
   if(S.queue.find(s=>s.id===id)) return T('Zaten ekli!','⚠️');
-
   const song = {id, title:`YouTube: ${id}`, thumb:`https://img.youtube.com/vi/${id}/mqdefault.jpg`, by:S.me};
   try{
     const r = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`);
     if(r.ok){ const d=await r.json(); if(d.title) song.title=d.title; }
   }catch(e){}
-
-  S.queue.push(song); inp.value='';
+  S.queue.push(song);
   renderQ(); bc('add-song',{song});
   T(`Eklendi: ${song.title.slice(0,28)}`,'✅');
   if(S.cur===-1){ loadT(0,true,0); bc('play',{cur:0,position:0}); }
+}
+
+async function addSong(){
+  // Geriye dönük uyumluluk
+  await handleAdd();
 }
 
 async function addPlaylist(playlistId){
@@ -677,16 +761,13 @@ async function addPlaylist(playlistId){
       const resp = await fetch(url);
       const data = await resp.json();
 
-      if(data.error){
-        T('Playlist yüklenemedi: ' + (data.error.message||'Hata'),'❌');
-        return;
-      }
+      if(data.error){ T('Playlist yüklenemedi: '+(data.error.message||'Hata'),'❌'); return; }
 
       for(const item of data.items){
         const id = item.snippet?.resourceId?.videoId;
         const title = item.snippet?.title || `YouTube: ${id}`;
         const thumb = item.snippet?.thumbnails?.medium?.url || `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
-        if(!id || title === 'Deleted video' || title === 'Private video') continue;
+        if(!id || title==='Deleted video' || title==='Private video') continue;
         if(S.queue.find(s=>s.id===id)) continue;
         const song = {id, title, thumb, by: S.me};
         S.queue.push(song);
@@ -706,7 +787,7 @@ async function addPlaylist(playlistId){
   }catch(e){
     T('Playlist yüklenemedi!','❌');
   } finally {
-    btn.textContent = '+ Ekle'; btn.disabled = false;
+    btn.textContent = '🔍'; btn.disabled = false;
   }
 }
 
