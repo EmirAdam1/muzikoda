@@ -431,17 +431,17 @@ body{
   <div class="lbox">
     <div class="lbl">Yeni oda oluştur</div>
     <div class="flds">
-      <input class="f" id="cn" placeholder="Adın" maxlength="20">
-      <input class="f" id="cr" placeholder="Oda adı (örn: gece-sohbet)" maxlength="28">
-      <input class="f" id="cp" placeholder="Şifre (isteğe bağlı)" maxlength="32" type="password">
+      <input class="f" id="cn" placeholder="Adın" maxlength="20" autocomplete="off">
+      <input class="f" id="cr" placeholder="Oda adı (örn: gece-sohbet)" maxlength="28" autocomplete="off">
+      <input class="f" id="cp" placeholder="Şifre (isteğe bağlı)" maxlength="32" type="text" autocomplete="new-password" onfocus="this.type='password'" style="-webkit-text-security:disc;">
       <button class="btn btn-p" onclick="createRoom()">✨ Oda Oluştur</button>
     </div>
     <div class="or">ya da</div>
     <div class="lbl">Mevcut odaya katıl</div>
     <div class="flds">
-      <input class="f" id="jn" placeholder="Adın" maxlength="20">
-      <input class="f" id="jr" placeholder="Oda adı" maxlength="28">
-      <input class="f" id="jp" placeholder="Şifre (varsa)" maxlength="32" type="password">
+      <input class="f" id="jn" placeholder="Adın" maxlength="20" autocomplete="off">
+      <input class="f" id="jr" placeholder="Oda adı" maxlength="28" autocomplete="off">
+      <input class="f" id="jp" placeholder="Şifre (varsa)" maxlength="32" type="text" autocomplete="new-password" onfocus="this.type='password'" style="-webkit-text-security:disc;">
       <button class="btn btn-s" onclick="joinRoom()">🚪 Katıl</button>
     </div>
   </div>
