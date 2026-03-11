@@ -9,22 +9,33 @@ const io = new Server(server, {
   cors: { origin: '*', methods: ['GET', 'POST'] }
 });
 
-// Statik dosyalar (index.html)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Oda durumlarını hafızada tut
-const rooms = {}; // roomId → { users: {socketId → {name}}, queue, cur, playing }
+const rooms = {};
 
 function getRoom(roomId) {
   if (!rooms[roomId]) {
-    rooms[roomId] = { users: {}, queue: [], cur: -1, playing: false };
+    rooms[roomId] = {
+      users: {},
+      queue: [],
+      cur: -1,
+      playing: false,
+      position: 0,      // son bilinen pozisyon (saniye)
+      posTimestamp: 0,  // o pozisyonun kaydedildiği zaman (Date.now())
+    };
   }
   return rooms[roomId];
 }
 
+// Odanın şu anki gerçek pozisyonunu hesapla
+function getCurrentPosition(r) {
+  if (!r.playing) return r.position;
+  const elapsed = (Date.now() - r.posTimestamp) / 1000;
+  return r.position + elapsed;
+}
+
 io.on('connection', (socket) => {
 
-  // Odaya katıl
   socket.on('join', ({ room, name }) => {
     socket.join(room);
     socket.data.room = room;
@@ -33,28 +44,24 @@ io.on('connection', (socket) => {
     const r = getRoom(room);
     r.users[socket.id] = { name };
 
-    // Yeni kullanıcıya mevcut durumu gönder
     socket.emit('state', {
       users: Object.values(r.users).map(u => u.name),
       queue: r.queue,
       cur: r.cur,
-      playing: r.playing
+      playing: r.playing,
+      position: getCurrentPosition(r), // güncel pozisyon
     });
 
-    // Odadakilere bildir
     socket.to(room).emit('user-joined', { name });
-
-    console.log(`[+] ${name} → #${room} (toplam: ${Object.keys(r.users).length})`);
+    console.log(`[+] ${name} → #${room}`);
   });
 
-  // Sohbet mesajı
   socket.on('chat', ({ text }) => {
     const { room, name } = socket.data;
     if (!room) return;
     socket.to(room).emit('chat', { name, text });
   });
 
-  // Şarkı eklendi
   socket.on('add-song', ({ song }) => {
     const { room } = socket.data;
     if (!room) return;
@@ -62,53 +69,60 @@ io.on('connection', (socket) => {
     if (!r.queue.find(s => s.id === song.id)) {
       r.queue.push(song);
       socket.to(room).emit('add-song', { song, from: socket.data.name });
-      if (r.cur === -1) { r.cur = 0; r.playing = true; }
+      if (r.cur === -1) { r.cur = 0; r.playing = true; r.position = 0; r.posTimestamp = Date.now(); }
     }
   });
 
-  // Play / pause
-  socket.on('play', ({ cur }) => {
+  // Play — pozisyon ile birlikte
+  socket.on('play', ({ cur, position }) => {
     const { room } = socket.data;
     if (!room) return;
     const r = getRoom(room);
-    r.cur = cur; r.playing = true;
-    socket.to(room).emit('play', { cur });
+    r.cur = cur;
+    r.playing = true;
+    r.position = position || 0;
+    r.posTimestamp = Date.now();
+    socket.to(room).emit('play', { cur, position: r.position });
   });
 
-  socket.on('pause', () => {
+  // Pause — pozisyon ile birlikte
+  socket.on('pause', ({ position }) => {
     const { room } = socket.data;
     if (!room) return;
-    getRoom(room).playing = false;
-    socket.to(room).emit('pause');
+    const r = getRoom(room);
+    r.playing = false;
+    r.position = position || getCurrentPosition(r);
+    r.posTimestamp = Date.now();
+    socket.to(room).emit('pause', { position: r.position });
   });
 
-  // Ses kanalına katıldı — odadaki herkese bildir (offer alsınlar)
+  // Seek — pozisyon değişti
+  socket.on('seek', ({ position, cur }) => {
+    const { room } = socket.data;
+    if (!room) return;
+    const r = getRoom(room);
+    r.position = position;
+    r.posTimestamp = Date.now();
+    r.cur = cur;
+    socket.to(room).emit('seek', { position, cur });
+  });
+
   socket.on('voice-join', () => {
     const { room } = socket.data;
     if (!room) return;
-    // Odadaki diğer herkese: "bana offer gönder" de
     socket.to(room).emit('voice-request-offer', { from: socket.id });
   });
 
-  // WebRTC sinyalleri (ses için)
-  socket.on('offer', ({ to, offer }) => {
-    io.to(to).emit('offer', { from: socket.id, offer });
-  });
-  socket.on('answer', ({ to, answer }) => {
-    io.to(to).emit('answer', { from: socket.id, answer });
-  });
-  socket.on('ice', ({ to, candidate }) => {
-    io.to(to).emit('ice', { from: socket.id, candidate });
-  });
+  socket.on('offer', ({ to, offer }) => { io.to(to).emit('offer', { from: socket.id, offer }); });
+  socket.on('answer', ({ to, answer }) => { io.to(to).emit('answer', { from: socket.id, answer }); });
+  socket.on('ice', ({ to, candidate }) => { io.to(to).emit('ice', { from: socket.id, candidate }); });
 
-  // Konuşma durumu
   socket.on('speaking', ({ v }) => {
     const { room, name } = socket.data;
     if (!room) return;
     socket.to(room).emit('speaking', { name, v });
   });
 
-  // Bağlantı kesildi
   socket.on('disconnect', () => {
     const { room, name } = socket.data;
     if (!room) return;
@@ -123,6 +137,5 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n✅ MüzikOda sunucusu çalışıyor!`);
-  console.log(`🌐 Tarayıcıda aç: http://localhost:${PORT}`);
-  console.log(`📡 Aynı Wi-Fi'dan erişim için IP adresini kullan\n`);
+  console.log(`🌐 http://localhost:${PORT}\n`);
 });
