@@ -545,9 +545,12 @@ function initSocket(){
   socket.emit('join',{room:S.room,name:S.me});
 
   // Mevcut oda durumu (yeni katılımda)
-  socket.on('state',({users,queue,cur,playing})=>{
+  socket.on('state',({users,queue,cur,playing,position})=>{
     users.forEach(n=>{if(n!==S.me)addP(n,false);});
-    if(queue?.length){S.queue=queue;renderQ();if(cur>=0)loadT(cur,playing);}
+    if(queue?.length){
+      S.queue=queue;renderQ();
+      if(cur>=0) loadT(cur, playing, position||0);
+    }
   });
 
   socket.on('user-joined',({name})=>{addP(name,false);sys(`${name} katıldı`);});
@@ -561,8 +564,9 @@ function initSocket(){
     }
   });
 
-  socket.on('play',({cur})=>loadT(cur,true));
-  socket.on('pause',()=>rPause());
+  socket.on('play',({cur,position})=>{loadT(cur,true,position||0);});
+  socket.on('pause',({position})=>{rPause(position);});
+  socket.on('seek',({cur,position})=>{seekTo(cur,position);});
   socket.on('speaking',({name,v})=>setSpk(name,v));
 
   socket.on('voice-request-offer', ({from})=>{
@@ -612,11 +616,39 @@ function ytCmd(func,args=[]){
   f.contentWindow?.postMessage(JSON.stringify({event:'command',func,args}),'*');
 }
 
-function loadT(i,play=true){
+// İlerleme takibi
+let S_startTime=0, S_startPos=0, S_duration=0;
+function startClock(pos){S_startTime=Date.now();S_startPos=pos;}
+function getPos(){
+  if(!S.playing)return S_startPos;
+  return S_startPos+(Date.now()-S_startTime)/1000;
+}
+
+// Progress bar güncelle
+setInterval(()=>{
+  if(!S.playing||S.cur<0)return;
+  const pos=getPos();
+  if(S_duration>0){
+    document.getElementById('prog-fill').style.width=(pos/S_duration*100)+'%';
+    document.getElementById('t-cur').textContent=fmt(pos);
+    document.getElementById('t-dur').textContent=fmt(S_duration);
+  }
+},500);
+
+// YT mesajlarını dinle (süre bilgisi için)
+window.addEventListener('message',e=>{
+  try{
+    const d=JSON.parse(e.data);
+    if(d.event==='infoDelivery'&&d.info?.duration) S_duration=d.info.duration;
+  }catch(e){}
+});
+
+function fmt(s){s=Math.max(0,Math.floor(s));return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
+
+function loadT(i,play=true,pos=0){
   if(i<0||i>=S.queue.length)return;
   S.cur=i;const s=S.queue[i];
 
-  // Hero görseli güncelle
   document.getElementById('npph').style.display='none';
   const img=document.getElementById('np-thumb-img');
   img.src=s.thumb;img.style.display='block';
@@ -624,33 +656,61 @@ function loadT(i,play=true){
   document.getElementById('nptitle').textContent=s.title;
   document.getElementById('npsub').textContent=`Ekleyen: ${s.by}`;
 
-  // iframe (gizli, sadece ses için)
   const f=document.getElementById('ytf');
-  f.src=`https://www.youtube.com/embed/${s.id}?autoplay=${play?1:0}&enablejsapi=1&origin=${location.origin}&rel=0&modestbranding=1`;
+  f.src=`https://www.youtube.com/embed/${s.id}?autoplay=${play?1:0}&enablejsapi=1&origin=${location.origin}&rel=0&modestbranding=1&start=${Math.floor(pos)}`;
   S.playing=play;
+  if(play) startClock(pos); else S_startPos=pos;
   updPB();
   document.getElementById('vz').classList.toggle('off',!play);
   renderQ();
-  // Ses seviyesini uygula
   setTimeout(()=>ytCmd('setVolume',[S.volume]),1500);
 }
 
 function togPlay(){
-  if(S.cur===-1){if(S.queue.length){loadT(0,true);bc('play',{cur:0});}return;}
+  if(S.cur===-1){if(S.queue.length){loadT(0,true,0);bc('play',{cur:0,position:0});}return;}
+  const pos=getPos();
   S.playing=!S.playing;
-  ytCmd(S.playing?'playVideo':'pauseVideo');
+  if(S.playing){
+    ytCmd('playVideo');
+    startClock(pos);
+    bc('play',{cur:S.cur,position:pos});
+  } else {
+    ytCmd('pauseVideo');
+    S_startPos=pos;
+    bc('pause',{position:pos});
+  }
   updPB();
   document.getElementById('vz').classList.toggle('off',!S.playing);
-  bc(S.playing?'play':'pause',{cur:S.cur});
 }
 
-function rPause(){
+function rPause(pos=0){
   if(S.cur<0)return;
   S.playing=false;
-  ytCmd('pauseVideo');
+  S_startPos=pos;
+  // iframe'i yeniden yükle doğru pozisyondan (pause için en güvenilir yol)
+  const s=S.queue[S.cur];
+  const f=document.getElementById('ytf');
+  f.src=`https://www.youtube.com/embed/${s.id}?autoplay=0&enablejsapi=1&origin=${location.origin}&rel=0&modestbranding=1&start=${Math.floor(pos)}`;
   updPB();
   document.getElementById('vz').classList.add('off');
+  setTimeout(()=>ytCmd('setVolume',[S.volume]),1000);
 }
+
+function seekTo(cur,pos){
+  S.cur=cur;S_startPos=pos;
+  if(S.playing) startClock(pos);
+  ytCmd('seekTo',[pos,true]);
+  renderQ();
+}
+
+// Progress bar tıklama → seek
+document.getElementById('prog-bar')?.addEventListener('click',function(e){
+  if(S.cur<0||!S_duration)return;
+  const ratio=e.offsetX/this.offsetWidth;
+  const pos=ratio*S_duration;
+  seekTo(S.cur,pos);
+  bc('seek',{cur:S.cur,position:pos});
+});
 
 function setVol(v){
   S.volume=parseInt(v);
@@ -664,13 +724,13 @@ function next(){
   if(!S.queue.length)return;
   let n=S.shuffle?Math.floor(Math.random()*S.queue.length):S.cur+1;
   if(n>=S.queue.length)n=S.repeat?0:-1;
-  if(n>=0){loadT(n,true);bc('play',{cur:n});}
+  if(n>=0){loadT(n,true,0);bc('play',{cur:n,position:0});}
 }
 function prev(){
   if(!S.queue.length)return;
   const p=Math.max(0,S.cur-1);
-  loadT(p,S.playing);
-  bc(S.playing?'play':'pause',{cur:p});
+  loadT(p,S.playing,0);
+  bc(S.playing?'play':'pause',{cur:p,position:0});
 }
 function updPB(){document.getElementById('pb').textContent=S.playing?'⏸':'▶';}
 function togShuffle(){S.shuffle=!S.shuffle;document.getElementById('shb').style.color=S.shuffle?'var(--accent)':'';}
@@ -681,7 +741,7 @@ function renderQ(){
   document.getElementById('qc').textContent=S.queue.length;
   if(!S.queue.length){el.innerHTML='<div style="text-align:center;color:var(--sub);font-size:.8rem;padding:18px 0">Henüz şarkı yok</div>';return;}
   el.innerHTML=S.queue.map((s,i)=>`
-    <div class="qi ${i===S.cur?'active':''}" onclick="loadT(${i},true);bc('play',{cur:${i}})">
+    <div class="qi ${i===S.cur?'active':''}" onclick="loadT(${i},true,0);bc('play',{cur:${i},position:0})">
       <div class="qthumb"><img src="${s.thumb}" onerror="this.style.display='none';this.parentNode.innerHTML='🎵'"></div>
       <div class="qinfo"><div class="qtitle">${esc(s.title)}</div><div class="qby">${esc(s.by)}</div></div>
       <button class="qdel" onclick="event.stopPropagation();delS(${i})">✕</button>
