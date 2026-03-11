@@ -544,11 +544,16 @@ function initSocket(){
   socket.emit('join',{room:S.room,name:S.me});
 
   // Mevcut oda durumu (yeni katılımda)
-  socket.on('state',({users,queue,cur,playing,position})=>{
+  socket.on('state',({users,queue,cur,playing,position,serverTime})=>{
     users.forEach(n=>{if(n!==S.me)addP(n,false);});
     if(queue?.length){
-      S.queue=queue;renderQ();
-      if(cur>=0) loadT(cur, playing, position||0);
+      S.queue=queue; renderQ();
+      if(cur>=0){
+        // Sunucudan bu yana geçen süreyi hesapla
+        const lag = serverTime ? (Date.now()-serverTime)/1000 : 0;
+        const syncPos = (position||0) + (playing ? lag : 0);
+        loadT(cur, playing, syncPos);
+      }
     }
   });
 
@@ -563,9 +568,21 @@ function initSocket(){
     }
   });
 
-  socket.on('play',({cur,position})=>{ loadT(cur,true,position||0); });
-  socket.on('pause',({position})=>{ rPause(position||0); });
-  socket.on('seek',({cur,position})=>{ doSeek(cur,position||0); });
+  socket.on('play',({cur,position,serverTime})=>{
+    const lag = serverTime ? (Date.now()-serverTime)/1000 : 0;
+    const syncPos = (position||0) + lag;
+    loadT(cur, true, syncPos);
+  });
+  socket.on('pause',({position,serverTime})=>{
+    // Pause'da gecikme telafisi yapmıyoruz — pozisyon sabit kalmalı
+    rPause(position||0);
+  });
+  socket.on('seek',({cur,position,serverTime})=>{
+    const lag = serverTime ? (Date.now()-serverTime)/1000 : 0;
+    // Seek sonrası oynatılıyorsa lag kadar ileri at
+    const syncPos = (position||0) + (S.playing ? lag : 0);
+    doSeek(cur, syncPos);
+  });
   socket.on('speaking',({name,v})=>setSpk(name,v));
 
   socket.on('voice-request-offer', ({from})=>{
