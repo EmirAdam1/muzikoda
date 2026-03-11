@@ -255,7 +255,8 @@ body{
   display:flex;align-items:center;gap:8px;
   padding:4px 14px 8px;
 }
-.vol-icon{font-size:.9rem;cursor:pointer;flex-shrink:0;}
+.vol-icon{font-size:.9rem;cursor:pointer;flex-shrink:0;transition:transform .15s;}
+.vol-icon:hover{transform:scale(1.2);}
 .vol-slider{
   flex:1;height:4px;
   -webkit-appearance:none;appearance:none;
@@ -474,7 +475,7 @@ body{
 
       <!-- Volume -->
       <div class="vol-row">
-        <span class="vol-icon" id="vol-icon">🔊</span>
+        <span class="vol-icon" id="vol-icon" onclick="toggleMuteVol()" title="Sesi kapat/aç" style="cursor:pointer;">🔊</span>
         <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="80"
           oninput="setVol(this.value)">
         <span class="vol-val" id="vol-val">80</span>
@@ -482,8 +483,8 @@ body{
 
       <!-- Add song -->
       <div class="addsong">
-        <input class="af" id="yti" placeholder="YouTube linki yapıştır..." onkeydown="if(event.key==='Enter')addSong()">
-        <button class="abtn" onclick="addSong()">+ Ekle</button>
+        <input class="af" id="yti" placeholder="YouTube şarkı veya playlist linki..." onkeydown="if(event.key==='Enter')addSong()">
+        <button class="abtn" id="addbtn" onclick="addSong()">+ Ekle</button>
       </div>
 
       <div class="qhead"><span>Sıra</span><span id="qc" style="color:var(--accent)">0</span></div>
@@ -605,25 +606,97 @@ function toggleMusic(){
   b.classList.toggle('on',!h);
 }
 
+// Ses ikonuna tıklayınca mute/unmute (sadece kendi ekranı)
+let S_volBeforeMute = 80;
+function toggleMuteVol(){
+  if(S.volume > 0){
+    S_volBeforeMute = S.volume;
+    setVol(0);
+    document.getElementById('vol-slider').value = 0;
+  } else {
+    setVol(S_volBeforeMute);
+    document.getElementById('vol-slider').value = S_volBeforeMute;
+  }
+}
+
+// YouTube playlist ID çıkar
+function xplaylist(url){
+  const m = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
 // YOUTUBE
 function xid(url){const m=url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:null;}
 
 async function addSong(){
-  const inp=document.getElementById('yti');
-  const url=inp.value.trim();
-  if(!url)return T('YouTube linki gir!','❌');
-  const id=xid(url);
-  if(!id)return T('Geçersiz link!','❌');
-  if(S.queue.find(s=>s.id===id))return T('Zaten ekli!','⚠️');
-  const song={id,title:`YouTube: ${id}`,thumb:`https://img.youtube.com/vi/${id}/mqdefault.jpg`,by:S.me};
+  const inp = document.getElementById('yti');
+  const url = inp.value.trim();
+  if(!url) return T('YouTube linki gir!','❌');
+
+  const playlistId = xplaylist(url);
+
+  // Playlist mi?
+  if(playlistId && !xid(url)){
+    await addPlaylist(playlistId);
+    inp.value = '';
+    return;
+  }
+
+  // Tekli şarkı
+  const id = xid(url);
+  if(!id) return T('Geçersiz link!','❌');
+  if(S.queue.find(s=>s.id===id)) return T('Zaten ekli!','⚠️');
+
+  const song = {id, title:`YouTube: ${id}`, thumb:`https://img.youtube.com/vi/${id}/mqdefault.jpg`, by:S.me};
   try{
-    const r=await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`);
-    if(r.ok){const d=await r.json();if(d.title)song.title=d.title;}
+    const r = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`);
+    if(r.ok){ const d=await r.json(); if(d.title) song.title=d.title; }
   }catch(e){}
-  S.queue.push(song);inp.value='';
-  renderQ();bc('add-song',{song});
-  T(`Eklendi: ${song.title.slice(0,26)}...`,'✅');
-  if(S.cur===-1){loadT(0,true);bc('play',{cur:0});}
+
+  S.queue.push(song); inp.value='';
+  renderQ(); bc('add-song',{song});
+  T(`Eklendi: ${song.title.slice(0,28)}...`,'✅');
+  if(S.cur===-1){ loadT(0,true,0); bc('play',{cur:0,position:0}); }
+}
+
+async function addPlaylist(playlistId){
+  const btn = document.getElementById('addbtn');
+  btn.textContent = '⏳'; btn.disabled = true;
+  T('Playlist yükleniyor...','🎵');
+
+  try{
+    // YouTube playlist sayfasını noembed ile çekemeyiz,
+    // ama video ID'lerini playlist sayfasından regex ile çekebiliriz
+    const resp = await fetch(`https://www.youtube.com/playlist?list=${playlistId}`);
+    const html = await resp.text();
+
+    // Video ID'lerini çek
+    const ids = [...new Set([...html.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)].map(m=>m[1]))];
+
+    if(!ids.length){ T('Playlist bulunamadı veya gizli!','❌'); return; }
+
+    let added = 0;
+    for(const id of ids.slice(0, 50)){ // max 50 şarkı
+      if(S.queue.find(s=>s.id===id)) continue;
+      const song = {id, title:`YouTube: ${id}`, thumb:`https://img.youtube.com/vi/${id}/mqdefault.jpg`, by:S.me};
+      try{
+        const r = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`);
+        if(r.ok){ const d=await r.json(); if(d.title) song.title=d.title; }
+      }catch(e){}
+      S.queue.push(song);
+      bc('add-song',{song});
+      added++;
+      renderQ();
+    }
+
+    T(`${added} şarkı eklendi! 🎶`,'✅');
+    if(S.cur===-1 && S.queue.length){ loadT(0,true,0); bc('play',{cur:0,position:0}); }
+
+  }catch(e){
+    T('Playlist yüklenemedi. Gizli olabilir.','❌');
+  } finally {
+    btn.textContent = '+ Ekle'; btn.disabled = false;
+  }
 }
 
 // ── YOUTUBE PLAYER API ──
@@ -762,7 +835,17 @@ function doSeek(cur, pos){
 function setVol(v){
   S.volume = parseInt(v);
   document.getElementById('vol-val').textContent = v;
-  document.getElementById('vol-icon').textContent = v==0?'🔇':v<50?'🔉':'🔊';
+  const icon = document.getElementById('vol-icon');
+  if(v == 0){
+    icon.textContent = '🔇';
+    icon.style.opacity = '0.5';
+  } else if(v < 50){
+    icon.textContent = '🔉';
+    icon.style.opacity = '1';
+  } else {
+    icon.textContent = '🔊';
+    icon.style.opacity = '1';
+  }
   if(ytReady && ytPlayer) ytPlayer.setVolume(S.volume);
 }
 
