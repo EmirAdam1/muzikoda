@@ -619,6 +619,9 @@ function toggleMuteVol(){
   }
 }
 
+// YouTube Data API v3
+const YT_API_KEY = 'AIzaSyCO8jzJYebvvDs1Hg6ADGTs75FaAlZsaSk';
+
 // YouTube playlist ID çıkar
 function xplaylist(url){
   const m = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
@@ -635,7 +638,7 @@ async function addSong(){
 
   const playlistId = xplaylist(url);
 
-  // Playlist mi?
+  // Playlist mi? (tekli video linki değilse)
   if(playlistId && !xid(url)){
     await addPlaylist(playlistId);
     inp.value = '';
@@ -655,7 +658,7 @@ async function addSong(){
 
   S.queue.push(song); inp.value='';
   renderQ(); bc('add-song',{song});
-  T(`Eklendi: ${song.title.slice(0,28)}...`,'✅');
+  T(`Eklendi: ${song.title.slice(0,28)}`,'✅');
   if(S.cur===-1){ loadT(0,true,0); bc('play',{cur:0,position:0}); }
 }
 
@@ -665,35 +668,43 @@ async function addPlaylist(playlistId){
   T('Playlist yükleniyor...','🎵');
 
   try{
-    // YouTube playlist sayfasını noembed ile çekemeyiz,
-    // ama video ID'lerini playlist sayfasından regex ile çekebiliriz
-    const resp = await fetch(`https://www.youtube.com/playlist?list=${playlistId}`);
-    const html = await resp.text();
-
-    // Video ID'lerini çek
-    const ids = [...new Set([...html.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)].map(m=>m[1]))];
-
-    if(!ids.length){ T('Playlist bulunamadı veya gizli!','❌'); return; }
-
+    let nextPage = '';
     let added = 0;
-    for(const id of ids.slice(0, 50)){ // max 50 şarkı
-      if(S.queue.find(s=>s.id===id)) continue;
-      const song = {id, title:`YouTube: ${id}`, thumb:`https://img.youtube.com/vi/${id}/mqdefault.jpg`, by:S.me};
-      try{
-        const r = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`);
-        if(r.ok){ const d=await r.json(); if(d.title) song.title=d.title; }
-      }catch(e){}
-      S.queue.push(song);
-      bc('add-song',{song});
-      added++;
-      renderQ();
-    }
+    let total = 0;
+
+    do {
+      const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${YT_API_KEY}${nextPage?'&pageToken='+nextPage:''}`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+
+      if(data.error){
+        T('Playlist yüklenemedi: ' + (data.error.message||'Hata'),'❌');
+        return;
+      }
+
+      for(const item of data.items){
+        const id = item.snippet?.resourceId?.videoId;
+        const title = item.snippet?.title || `YouTube: ${id}`;
+        const thumb = item.snippet?.thumbnails?.medium?.url || `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+        if(!id || title === 'Deleted video' || title === 'Private video') continue;
+        if(S.queue.find(s=>s.id===id)) continue;
+        const song = {id, title, thumb, by: S.me};
+        S.queue.push(song);
+        bc('add-song',{song});
+        added++;
+        renderQ();
+      }
+
+      nextPage = data.nextPageToken || '';
+      total += data.items?.length || 0;
+
+    } while(nextPage && total < 200);
 
     T(`${added} şarkı eklendi! 🎶`,'✅');
     if(S.cur===-1 && S.queue.length){ loadT(0,true,0); bc('play',{cur:0,position:0}); }
 
   }catch(e){
-    T('Playlist yüklenemedi. Gizli olabilir.','❌');
+    T('Playlist yüklenemedi!','❌');
   } finally {
     btn.textContent = '+ Ekle'; btn.disabled = false;
   }
