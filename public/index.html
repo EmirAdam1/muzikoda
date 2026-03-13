@@ -131,119 +131,146 @@ body{
 #app{display:none;flex:1;overflow:hidden;flex-direction:column;}
 #app.on{display:flex;}
 
+/* TOOLBAR */
 .topbar{
-  height:52px;display:flex;align-items:center;
-  justify-content:space-between;
-  padding:0 16px;border-bottom:1px solid var(--border);
-  background:var(--panel);flex-shrink:0;gap:12px;
+  height:52px;flex-shrink:0;
+  background:#0b0c14;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 18px;gap:10px;
 }
-.t-brand{font-weight:800;font-size:1.05rem;letter-spacing:-.03em;}
-.room-chip{
-  display:flex;align-items:center;gap:6px;
-  background:var(--card);border:1px solid var(--border);
-  border-radius:100px;padding:4px 12px;
-  font-size:.78rem;font-weight:600;color:var(--sub);
+.t-brand{
+  display:flex;align-items:center;gap:8px;
+  font-size:.95rem;font-weight:900;letter-spacing:-.03em;
+  margin-right:6px;
 }
-.dot{
+.tb-logo-dot{
   width:7px;height:7px;border-radius:50%;
-  background:var(--green);box-shadow:0 0 6px var(--green);
-  animation:dp 2s ease-in-out infinite;
+  background:var(--accent);box-shadow:0 0 8px var(--accent);
+  animation:dp 1.8s infinite;flex-shrink:0;
 }
 @keyframes dp{0%,100%{opacity:1;}50%{opacity:.3;}}
-
+.room-chip{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(91,106,245,.1);border:1px solid rgba(91,106,245,.2);
+  border-radius:100px;padding:4px 12px;
+  font-size:.72rem;font-weight:600;color:#a5b4fc;
+}
+.dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--accent);animation:dp 1.8s infinite;
+}
+.t-spacer{flex:1;}
 .t-right{display:flex;align-items:center;gap:8px;}
 .music-tog{
   display:flex;align-items:center;gap:6px;
-  background:var(--card);border:1px solid var(--border);
-  border-radius:100px;padding:5px 13px 5px 9px;
-  font-size:.78rem;font-weight:700;color:var(--sub);
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);
+  border-radius:100px;padding:5px 13px;
+  font-size:.72rem;font-weight:600;color:rgba(255,255,255,.45);
   cursor:pointer;transition:all .15s;
 }
-.music-tog:hover{border-color:var(--accent);color:var(--text);}
-.music-tog.on{background:rgba(91,106,245,.12);border-color:rgba(91,106,245,.4);color:var(--accent);}
-.me-chip{display:flex;align-items:center;gap:7px;font-size:.82rem;font-weight:600;color:var(--sub);}
+.music-tog:hover{background:rgba(255,255,255,.1);color:#fff;}
+.music-tog.on{background:rgba(91,106,245,.12);border-color:rgba(91,106,245,.3);color:#a5b4fc;}
+.me-chip{
+  display:flex;align-items:center;gap:7px;
+  font-size:.78rem;font-weight:600;color:rgba(255,255,255,.4);
+}
 .av{
-  border-radius:50%;display:flex;align-items:center;
+  border-radius:8px;display:flex;align-items:center;
   justify-content:center;font-weight:800;flex-shrink:0;
 }
 
 .main{display:flex;flex:1;overflow:hidden;}
 
-/* LEFT */
+/* SOL: Sesli oda */
 .left{
+  width:220px;flex-shrink:0;
   display:flex;flex-direction:column;
-  flex:1;overflow:hidden;
   border-right:1px solid var(--border);
+  background:#0c0d13;
 }
-
-/* Voice */
-.vcroom{padding:16px;border-bottom:1px solid var(--border);}
-.vch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.vct{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.92rem;}
-.vcst{font-size:.7rem;font-weight:500;color:var(--sub);}
-.vc-btns{display:flex;gap:8px;}
+.col-title{
+  height:44px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:.65rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:rgba(255,255,255,.28);flex-shrink:0;
+}
+.vc-btns{display:flex;gap:6px;}
 .ib{
-  width:38px;height:38px;border-radius:50%;
-  border:1px solid var(--border);
-  background:var(--card);color:var(--text);
-  cursor:pointer;font-size:1rem;
+  width:30px;height:30px;border-radius:9px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.4);
+  cursor:pointer;font-size:.82rem;
   display:flex;align-items:center;justify-content:center;
   transition:all .15s;
 }
-.ib:hover{background:var(--hover);}
-.ib.g{background:rgba(62,207,142,.12);border-color:rgba(62,207,142,.4);color:var(--green);box-shadow:0 0 14px rgba(62,207,142,.2);}
-.ib.r{background:rgba(240,92,92,.12);border-color:rgba(240,92,92,.4);color:var(--red);}
-
-.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;}
+.ib:hover{background:rgba(255,255,255,.12);color:#fff;}
+.ib.g{background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.3);color:var(--green);}
+.ib.r{background:rgba(240,92,92,.1);border-color:rgba(240,92,92,.3);color:var(--red);}
+.pgrid{display:flex;flex-direction:column;gap:6px;padding:10px;}
 .pcard{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r);padding:14px 8px 10px;
-  display:flex;flex-direction:column;align-items:center;gap:6px;
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:11px;
+  background:rgba(255,255,255,.04);border:1px solid transparent;
   transition:all .2s;position:relative;
 }
 .pcard.spk{
-  border-color:rgba(62,207,142,.5);
-  background:rgba(62,207,142,.07);
-  box-shadow:0 0 18px rgba(62,207,142,.1);
+  background:rgba(62,207,142,.06);
+  border-color:rgba(62,207,142,.2);
 }
-.p-av-wrap{position:relative;}
+.p-av-wrap{position:relative;flex-shrink:0;}
 .pring{
-  position:absolute;inset:-4px;border-radius:50%;
+  position:absolute;inset:-3px;border-radius:13px;
   border:2px solid var(--green);opacity:0;transition:opacity .2s;
 }
 .pcard.spk .pring{opacity:1;animation:rp 1.2s ease-in-out infinite;}
-@keyframes rp{0%,100%{transform:scale(1);}50%{transform:scale(1.1);opacity:.5;}}
-.pname{font-size:.71rem;font-weight:600;color:var(--sub);text-align:center;max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.pmic{position:absolute;bottom:6px;right:6px;font-size:.62rem;}
+@keyframes rp{0%,100%{transform:scale(1);}50%{transform:scale(1.08);opacity:.5;}}
+.pname{font-size:.78rem;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pmic{font-size:.68rem;opacity:.5;flex-shrink:0;}
+.pcard.spk .pmic{opacity:1;}
 
-/* Chat */
+/* ORTA: Chat */
 .chat{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.ch{padding:10px 16px;border-bottom:1px solid var(--border);font-size:.73rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;}
-.msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:1px;scrollbar-width:thin;scrollbar-color:var(--card) transparent;}
-.msg{display:flex;gap:10px;padding:5px 8px;border-radius:8px;transition:background .1s;animation:fi .18s ease;}
-.msg:hover{background:var(--card);}
-.msg.sys{justify-content:center;font-size:.73rem;color:var(--sub);font-style:italic;padding:3px;}
-@keyframes fi{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+.ch{
+  height:44px;display:flex;align-items:center;
+  padding:0 16px;border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:.65rem;font-weight:700;color:rgba(255,255,255,.28);
+  text-transform:uppercase;letter-spacing:.08em;flex-shrink:0;
+}
+.msgs{
+  flex:1;overflow-y:auto;padding:12px 14px;
+  display:flex;flex-direction:column;gap:2px;
+  scrollbar-width:thin;scrollbar-color:var(--card) transparent;
+}
+.msg{display:flex;gap:10px;padding:5px 8px;border-radius:9px;transition:background .1s;animation:fi .18s ease;}
+.msg:hover{background:rgba(255,255,255,.03);}
+.msg.sys{justify-content:center;font-size:.7rem;color:var(--sub);font-style:italic;padding:4px;}
+@keyframes fi{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
 .mbody{}
-.mwho{font-size:.72rem;font-weight:700;margin-bottom:2px;}
+.mwho{font-size:.7rem;font-weight:700;margin-bottom:2px;}
 .mtxt{font-size:.875rem;line-height:1.45;}
-.cinput{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.cinput{
+  padding:10px 14px;border-top:1px solid rgba(255,255,255,.05);
+  display:flex;gap:8px;flex-shrink:0;
+}
 .cf{
-  flex:1;background:var(--card);border:1px solid var(--border);
+  flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);
   border-radius:10px;padding:9px 13px;
   color:var(--text);font-family:inherit;font-size:.875rem;
-  outline:none;transition:border-color .2s;
+  outline:none;transition:all .2s;
 }
-.cf:focus{border-color:var(--accent);}
+.cf:focus{border-color:var(--accent);background:rgba(91,106,245,.05);}
 .cf::placeholder{color:var(--sub);}
 .sbtn{
   width:38px;height:38px;border-radius:10px;
-  background:var(--accent);color:#fff;border:none;
-  cursor:pointer;font-size:1.05rem;
+  background:linear-gradient(135deg,var(--accent),#8b5cf6);
+  color:#fff;border:none;
+  cursor:pointer;font-size:.9rem;
   display:flex;align-items:center;justify-content:center;
   transition:all .15s;flex-shrink:0;
+  box-shadow:0 3px 12px rgba(91,106,245,.35);
 }
-.sbtn:hover{background:#4a59e8;}
+.sbtn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(91,106,245,.5);}
 
 /* RIGHT: music — Split Layout */
 .mpanel{
@@ -576,45 +603,47 @@ body{
 
 <!-- APP -->
 <div id="app">
+  <!-- TOOLBAR -->
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div class="t-brand">MüzikOda</div>
-      <div class="room-chip"><div class="dot"></div><span id="tb-room">oda</span></div>
+    <div class="t-brand">
+      <div class="tb-logo-dot"></div>
+      MüzikOda
     </div>
+    <div class="room-chip"><div class="dot"></div><span id="tb-room">oda</span></div>
+    <div class="t-spacer"></div>
     <div class="t-right">
+      <button class="music-tog" id="mb" onclick="toggleMute()" title="Mikrofon">🎙️ Bağlı</button>
+      <button class="music-tog" id="vcb" onclick="toggleVoice()" title="Bağlan / Ayrıl">📞 Ses</button>
       <button class="music-tog" id="fav-btn" onclick="toggleFav()" title="Favoriye ekle/çıkar">⭐</button>
       <button class="music-tog" id="mtog" onclick="toggleMusic()">🎵 Müzik</button>
       <div class="me-chip">
-        <div class="av c0" id="me-av" style="width:26px;height:26px;font-size:.62rem;"></div>
+        <div class="av c0" id="me-av" style="width:28px;height:28px;font-size:.62rem;"></div>
         <span id="tb-me">—</span>
       </div>
     </div>
   </div>
 
   <div class="main">
-    <!-- LEFT -->
+    <!-- SOL: Sesli oda -->
     <div class="left">
-      <div class="vcroom">
-        <div class="vch">
-          <div class="vct">🔊 Sesli Oda <span class="vcst" id="vcst">· bağlı değil</span></div>
-          <div class="vc-btns">
-            <button class="ib" id="mb" onclick="toggleMute()" title="Mikrofon">🎙️</button>
-            <button class="ib" id="vcb" onclick="toggleVoice()" title="Bağlan / Ayrıl">📞</button>
-          </div>
-        </div>
-        <div class="pgrid" id="pgrid"></div>
+      <div class="col-title">
+        🔊 Sesli Oda
+        <span class="vcst" id="vcst" style="font-size:.6rem;font-weight:500;color:var(--sub);text-transform:none;letter-spacing:0;">· bağlı değil</span>
       </div>
-      <div class="chat">
-        <div class="ch">💬 Sohbet</div>
-        <div class="msgs" id="msgs"></div>
-        <div class="cinput">
-          <input class="cf" id="cf" placeholder="Mesaj yaz..." maxlength="300" onkeydown="if(event.key==='Enter')send()">
-          <button class="sbtn" onclick="send()">➤</button>
-        </div>
+      <div class="pgrid" id="pgrid"></div>
+    </div>
+
+    <!-- ORTA: Sohbet -->
+    <div class="chat">
+      <div class="ch">💬 Sohbet</div>
+      <div class="msgs" id="msgs"></div>
+      <div class="cinput">
+        <input class="cf" id="cf" placeholder="Mesaj yaz..." maxlength="300" onkeydown="if(event.key==='Enter')send()">
+        <button class="sbtn" onclick="send()">➤</button>
       </div>
     </div>
 
-    <!-- RIGHT: music -->
+    <!-- SAĞ: Müzik paneli -->
     <div class="mpanel hide" id="mp">
       <div class="mph">
         <div class="mpt">
@@ -627,7 +656,6 @@ body{
         <div class="quota-mini">Kalan: <span id="quota-mini-val">100</span> hak</div>
       </div>
 
-      <!-- Split: sol kapak + sağ bilgi + mini kontroller -->
       <div class="np-split">
         <div class="np-art" id="np-hero">
           <div class="np-art-ph" id="npph">🎵</div>
@@ -647,10 +675,8 @@ body{
         </div>
       </div>
 
-      <!-- YouTube Player gizli -->
       <div id="ytf" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"></div>
 
-      <!-- Progress bar -->
       <div class="prog-wrap">
         <div class="prog-bar" id="prog-bar">
           <div class="prog-fill" id="prog-fill"></div>
@@ -661,7 +687,6 @@ body{
         </div>
       </div>
 
-      <!-- Vol + Karıştır/Tekrar aynı satırda -->
       <div class="mp-bottom">
         <div class="vol-row">
           <div class="vol-icon" id="vol-icon" onclick="toggleMuteVol()">🔊</div>
@@ -673,7 +698,6 @@ body{
         <button class="vol-flag" id="rpb" onclick="togRepeat()" title="Tekrar">↺</button>
       </div>
 
-      <!-- Arama -->
       <div style="padding:10px 12px 6px;display:flex;gap:6px;">
         <input class="af" id="yti" placeholder="Şarkı ara veya link yapıştır..." onkeydown="handleYtiKey(event)">
         <button class="abtn" id="addbtn" onclick="handleAdd()">🔍</button>
@@ -1307,19 +1331,18 @@ async function toggleVoice(){
   if(!S.voiceOn){
     try{
       localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-      S.voiceOn=true;b.className='ib g';b.textContent='📞';
+      S.voiceOn=true;b.classList.add('on');b.textContent='📞 Bağlı';
       st.textContent='· bağlı';st.style.color='var(--green)';
       setupVAD(localStream);upP(S.me,{micOn:true});
       T('Ses kanalına bağlandın 🎙️','✅');
-      // Odadaki herkese offer gönder
       bc('voice-join',{});
     }catch(e){T('Mikrofon izni gerekli!','❌');}
   } else {
     localStream?.getTracks().forEach(t=>t.stop());localStream=null;
     Object.values(pcs).forEach(p=>p.close());pcs={};
     S.voiceOn=false;S.muted=false;
-    b.className='ib';b.textContent='📞';
-    document.getElementById('mb').className='ib';document.getElementById('mb').textContent='🎙️';
+    b.classList.remove('on');b.textContent='📞 Ses';
+    const mb=document.getElementById('mb');mb.classList.remove('on');mb.textContent='🎙️ Bağlı';
     st.textContent='· bağlı değil';st.style.color='';
     upP(S.me,{micOn:false,speaking:false});T('Ses kanalından ayrıldın','ℹ️');
   }
@@ -1328,7 +1351,8 @@ function toggleMute(){
   if(!S.voiceOn)return;S.muted=!S.muted;
   localStream?.getAudioTracks().forEach(t=>t.enabled=!S.muted);
   const b=document.getElementById('mb');
-  b.className=S.muted?'ib r':'ib';b.textContent=S.muted?'🔇':'🎙️';
+  if(S.muted){b.classList.add('on');b.style.color='var(--red)';b.textContent='🔇 Sessiz';}
+  else{b.classList.remove('on');b.style.color='';b.textContent='🎙️ Bağlı';}
   T(S.muted?'Mikrofon kapalı 🔇':'Mikrofon açık 🎙️','ℹ️');
 }
 function setupVAD(stream){
@@ -1393,11 +1417,11 @@ function upP(name,d){if(S.peers[name])Object.assign(S.peers[name],d);renderP();}
 function setSpk(name,v){if(S.peers[name]){S.peers[name].speaking=v;renderP();}}
 function renderP(){
   const el=document.getElementById('pgrid'),list=Object.values(S.peers);
-  if(!list.length){el.innerHTML='';return;}
+  if(!list.length){el.innerHTML='<div style="padding:12px 14px;font-size:.68rem;color:rgba(255,255,255,.2);font-style:italic;">Henüz kimse bağlı değil</div>';return;}
   el.innerHTML=list.map(p=>`
     <div class="pcard ${p.speaking?'spk':''}">
       <div class="p-av-wrap">
-        <div class="av ${col(p.name)}" style="width:44px;height:44px;font-size:.85rem;">${ini(p.name)}</div>
+        <div class="av ${col(p.name)}" style="width:36px;height:36px;border-radius:10px;font-size:.68rem;">${ini(p.name)}</div>
         <div class="pring"></div>
       </div>
       <div class="pname">${esc(p.name)}${p.isMe?' (sen)':''}</div>
