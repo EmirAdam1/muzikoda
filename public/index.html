@@ -29,49 +29,103 @@ body{
 
 /* LANDING */
 #landing{
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  height:100vh;gap:28px;padding:24px;
-  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(91,106,245,.13) 0%,transparent 70%);
+  display:flex;align-items:center;justify-content:center;
+  height:100vh;padding:24px;
+  background:radial-gradient(ellipse 80% 60% at 30% 0%,rgba(91,106,245,.1) 0%,transparent 70%);
 }
-.brand{display:flex;align-items:center;gap:14px;}
-.brand-icon{
-  width:54px;height:54px;border-radius:16px;
+.lcard{
+  display:flex;width:100%;max-width:740px;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:24px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 1px rgba(91,106,245,.06);
+}
+.lcol-left{
+  width:330px;flex-shrink:0;padding:34px 30px;
+  background:linear-gradient(160deg,rgba(91,106,245,.06) 0%,transparent 60%);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+}
+.l-logo{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+.l-logo-icon{
+  width:36px;height:36px;border-radius:11px;
   background:linear-gradient(135deg,#5b6af5,#8b5cf6);
   display:flex;align-items:center;justify-content:center;
-  font-size:1.6rem;
-  box-shadow:0 8px 30px rgba(91,106,245,.45);
+  font-size:1rem;box-shadow:0 4px 14px rgba(91,106,245,.4);
 }
-.brand-name{font-size:1.9rem;font-weight:800;letter-spacing:-.04em;}
-.brand-tag{color:var(--sub);font-size:.85rem;margin-top:2px;}
-
-.lbox{
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:20px;padding:26px;
-  width:100%;max-width:400px;
-  display:flex;flex-direction:column;gap:18px;
+.l-logo-name{font-size:1.2rem;font-weight:900;letter-spacing:-.04em;}
+.l-logo-tag{font-size:.67rem;color:var(--sub);margin-bottom:24px;}
+.l-feats{display:flex;flex-direction:column;gap:13px;margin-bottom:28px;}
+.l-feat{display:flex;align-items:center;gap:12px;}
+.l-feat-ico{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;
+  background:rgba(91,106,245,.1);border:1px solid rgba(91,106,245,.15);
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;
 }
-.lbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);}
-.flds{display:flex;flex-direction:column;gap:8px;}
+.l-feat-title{font-size:.8rem;font-weight:700;}
+.l-feat-sub{font-size:.63rem;color:var(--sub);margin-top:1px;}
+.l-fav-section{margin-top:auto;}
+.l-fav-title{
+  font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.2);margin-bottom:9px;
+  display:flex;align-items:center;gap:7px;
+}
+.l-fav-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.l-fav-list{display:flex;flex-direction:column;gap:5px;}
+.fav-item{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:11px;padding:8px 11px;cursor:pointer;transition:all .15s;
+}
+.fav-item:hover{background:rgba(91,106,245,.08);border-color:rgba(91,106,245,.2);}
+.fav-icon{font-size:.95rem;flex-shrink:0;}
+.fav-info{flex:1;overflow:hidden;}
+.fav-name{font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fav-meta{font-size:.6rem;color:var(--sub);margin-top:1px;}
+.fav-enter{
+  background:rgba(91,106,245,.2);color:#a5b4fc;border:none;
+  border-radius:7px;padding:4px 10px;font-size:.68rem;font-weight:700;
+  cursor:pointer;flex-shrink:0;font-family:inherit;transition:all .15s;
+}
+.fav-enter:hover{background:rgba(91,106,245,.35);}
+.fav-del{background:none;border:none;color:var(--sub);cursor:pointer;font-size:.72rem;padding:2px 4px;border-radius:5px;flex-shrink:0;transition:all .15s;}
+.fav-del:hover{color:var(--red);}
+.lcol-right{flex:1;padding:34px 30px;display:flex;flex-direction:column;}
+.l-right-title{font-size:.98rem;font-weight:800;letter-spacing:-.02em;margin-bottom:3px;}
+.l-right-sub{font-size:.68rem;color:var(--sub);margin-bottom:20px;}
+.l-tabs{
+  display:flex;gap:4px;background:rgba(255,255,255,.04);
+  border-radius:10px;padding:3px;margin-bottom:20px;
+}
+.l-tab{
+  flex:1;height:32px;border-radius:7px;border:none;
+  font-family:inherit;font-size:.76rem;font-weight:600;
+  cursor:pointer;transition:all .2s;color:var(--sub);background:none;
+}
+.l-tab.on{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.l-form{display:flex;flex-direction:column;gap:10px;}
+.lbl{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);}
+.flds{display:flex;flex-direction:column;gap:5px;}
 .f{
   width:100%;background:var(--card);border:1px solid var(--border);
-  border-radius:10px;padding:11px 14px;
-  color:var(--text);font-family:inherit;font-size:.9rem;
-  outline:none;transition:border-color .2s;
+  border-radius:10px;padding:10px 13px;
+  color:var(--text);font-family:inherit;font-size:.86rem;
+  outline:none;transition:all .2s;
 }
 .f::placeholder{color:var(--sub);}
-.f:focus{border-color:var(--accent);}
+.f:focus{border-color:var(--accent);background:rgba(91,106,245,.05);}
 .btn{
-  border:none;border-radius:10px;padding:12px;
-  font-family:inherit;font-size:.88rem;font-weight:700;
+  border:none;border-radius:10px;padding:11px;
+  font-family:inherit;font-size:.86rem;font-weight:700;
   cursor:pointer;transition:all .15s;width:100%;
 }
-.btn-p{background:var(--accent);color:#fff;box-shadow:0 4px 18px rgba(91,106,245,.35);}
-.btn-p:hover{background:#4a59e8;transform:translateY(-1px);}
+.btn-p{background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;box-shadow:0 4px 18px rgba(91,106,245,.35);}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(91,106,245,.5);}
 .btn-s{background:var(--card);color:var(--text);border:1px solid var(--border);}
 .btn-s:hover{background:var(--hover);}
-.or{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:.78rem;}
+.or{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:.75rem;}
 .or::before,.or::after{content:'';flex:1;height:1px;background:var(--border);}
+.l-footer{margin-top:auto;padding-top:16px;font-size:.6rem;color:rgba(255,255,255,.15);display:flex;align-items:center;gap:5px;}
+.l-footer-dot{width:3px;height:3px;border-radius:50%;background:var(--accent);opacity:.5;}
 
 /* APP */
 #app{display:none;flex:1;overflow:hidden;flex-direction:column;}
@@ -311,15 +365,15 @@ body{
   background:linear-gradient(135deg,var(--accent),#8b5cf6);cursor:pointer;
 }
 .vol-val{font-size:.62rem;color:rgba(255,255,255,.22);width:20px;text-align:right;flex-shrink:0;}
-.mp-flags{display:flex;gap:4px;}
-.mp-flag{
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);
-  color:rgba(255,255,255,.3);cursor:pointer;
-  padding:5px 10px;border-radius:8px;font-size:.67rem;font-weight:600;
-  transition:all .15s;white-space:nowrap;font-family:inherit;
+.vol-divider{width:1px;height:18px;background:rgba(255,255,255,.08);flex-shrink:0;}
+.vol-flag{
+  width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);
+  font-size:1rem;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
 }
-.mp-flag:hover{background:rgba(255,255,255,.1);color:#fff;}
-.mp-flag.on{background:rgba(91,106,245,.15);color:var(--accent);border-color:rgba(91,106,245,.3);}
+.vol-flag:hover{background:rgba(255,255,255,.1);color:#fff;}
+.vol-flag.on{background:rgba(91,106,245,.18);color:#a5b4fc;}
 
 /* Arama */
 .af{
@@ -439,36 +493,84 @@ body{
 
 <!-- LANDING -->
 <div id="landing">
-  <div class="brand">
-    <div class="brand-icon">🎙️</div>
-    <div>
-      <div class="brand-name">MüzikOda</div>
-      <div class="brand-tag">Arkadaşlarınla sesli konuş, müzik dinle</div>
-    </div>
-  </div>
+  <div class="lcard">
 
-  <!-- Favoriler -->
-  <div id="fav-box" style="display:none;width:100%;max-width:400px;">
-    <div class="lbl" style="margin-bottom:8px;">⭐ Favori Odalar</div>
-    <div id="fav-list" style="display:flex;flex-direction:column;gap:6px;"></div>
-  </div>
+    <!-- SOL: logo + özellikler + favoriler -->
+    <div class="lcol-left">
+      <div class="l-logo">
+        <div class="l-logo-icon">🎵</div>
+        <span class="l-logo-name">MüzikOda</span>
+      </div>
+      <div class="l-logo-tag">Arkadaşlarınla gerçek zamanlı müzik</div>
 
-  <div class="lbox">
-    <div class="lbl">Yeni oda oluştur</div>
-    <div class="flds">
-      <input class="f" id="cn" placeholder="Adın" maxlength="20" autocomplete="username">
-      <input class="f" id="cr" placeholder="Oda adı (örn: gece-sohbet)" maxlength="28" autocomplete="off">
-      <input class="f" id="cp" placeholder="Şifre (isteğe bağlı)" maxlength="32" autocomplete="new-password">
-      <button class="btn btn-p" onclick="createRoom()">✨ Oda Oluştur</button>
+      <div class="l-feats">
+        <div class="l-feat">
+          <div class="l-feat-ico">🔊</div>
+          <div>
+            <div class="l-feat-title">Sesli Sohbet</div>
+            <div class="l-feat-sub">Gerçek zamanlı, gecikme yok</div>
+          </div>
+        </div>
+        <div class="l-feat">
+          <div class="l-feat-ico">🎶</div>
+          <div>
+            <div class="l-feat-title">Senkron Müzik</div>
+            <div class="l-feat-sub">Herkes aynı anda aynı saniyede</div>
+          </div>
+        </div>
+        <div class="l-feat">
+          <div class="l-feat-ico">📋</div>
+          <div>
+            <div class="l-feat-title">YouTube Playlist</div>
+            <div class="l-feat-sub">Link yapıştır veya isimle ara</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="l-fav-section">
+        <div class="l-fav-title">Son Odalar</div>
+        <div class="l-fav-list" id="fav-list"></div>
+      </div>
     </div>
-    <div class="or">ya da</div>
-    <div class="lbl">Mevcut odaya katıl</div>
-    <div class="flds">
-      <input class="f" id="jn" placeholder="Adın" maxlength="20" autocomplete="username">
-      <input class="f" id="jr" placeholder="Oda adı" maxlength="28" autocomplete="off">
-      <input class="f" id="jp" placeholder="Şifre (varsa)" maxlength="32" autocomplete="current-password">
-      <button class="btn btn-s" onclick="joinRoom()">🚪 Katıl</button>
+
+    <!-- SAĞ: form -->
+    <div class="lcol-right">
+      <div class="l-right-title">Odaya Gir</div>
+      <div class="l-right-sub">Yeni oda oluştur veya mevcut odaya katıl</div>
+
+      <div class="l-tabs">
+        <button class="l-tab on" onclick="setLTab('create',this)">✦ Oda Oluştur</button>
+        <button class="l-tab" onclick="setLTab('join',this)">→ Odaya Katıl</button>
+      </div>
+
+      <!-- Oluştur -->
+      <div class="l-form" id="lf-create">
+        <div class="lbl">Adın</div>
+        <input class="f" id="cn" placeholder="Adını gir..." maxlength="20" autocomplete="username">
+        <div class="lbl">Oda Adı</div>
+        <input class="f" id="cr" placeholder="Oda adı (örn: gece-sohbet)" maxlength="28" autocomplete="off">
+        <div class="lbl">Şifre <span style="text-transform:none;letter-spacing:0;font-weight:400;opacity:.6;">(isteğe bağlı)</span></div>
+        <input class="f" id="cp" placeholder="Şifre..." maxlength="32">
+        <button class="btn btn-p" onclick="createRoom()">✨ Oda Oluştur</button>
+      </div>
+
+      <!-- Katıl -->
+      <div class="l-form" id="lf-join" style="display:none;">
+        <div class="lbl">Adın</div>
+        <input class="f" id="jn" placeholder="Adını gir..." maxlength="20" autocomplete="username">
+        <div class="lbl">Oda Adı</div>
+        <input class="f" id="jr" placeholder="Oda adı" maxlength="28" autocomplete="off">
+        <div class="lbl">Şifre <span style="text-transform:none;letter-spacing:0;font-weight:400;opacity:.6;">(şifreli odalar için)</span></div>
+        <input class="f" id="jp" placeholder="Şifre varsa gir..." maxlength="32">
+        <button class="btn btn-p" onclick="joinRoom()">🚪 Odaya Katıl</button>
+      </div>
+
+      <div class="l-footer">
+        <div class="l-footer-dot"></div>
+        Ücretsiz · Kayıt gerekmez · Türkiye'den erişilebilir
+      </div>
     </div>
+
   </div>
 </div>
 
@@ -538,11 +640,9 @@ body{
             <div class="np-artist" id="npsub">Şarkı ara veya link yapıştır</div>
           </div>
           <div class="np-mini-ctrls">
-            <button class="np-mb" id="shb" onclick="togShuffle()" title="Karıştır">⇄</button>
             <button class="np-mb" onclick="prev()">⏮</button>
             <button class="np-mplay" id="pb" onclick="togPlay()">▶</button>
             <button class="np-mb" onclick="next()">⏭</button>
-            <button class="np-mb" id="rpb" onclick="togRepeat()" title="Tekrarla">↺</button>
           </div>
         </div>
       </div>
@@ -561,17 +661,16 @@ body{
         </div>
       </div>
 
-      <!-- Vol + Karıştır/Tekrar bayrakları -->
+      <!-- Vol + Karıştır/Tekrar aynı satırda -->
       <div class="mp-bottom">
         <div class="vol-row">
           <div class="vol-icon" id="vol-icon" onclick="toggleMuteVol()">🔊</div>
           <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="80" oninput="setVol(this.value)">
           <span class="vol-val" id="vol-val">80</span>
         </div>
-        <div class="mp-flags">
-          <button class="mp-flag" id="shb2" onclick="togShuffle()">⇄ Karıştır</button>
-          <button class="mp-flag" id="rpb2" onclick="togRepeat()">↺ Tekrar</button>
-        </div>
+        <div class="vol-divider"></div>
+        <button class="vol-flag" id="shb" onclick="togShuffle()" title="Karıştır">⇄</button>
+        <button class="vol-flag" id="rpb" onclick="togRepeat()" title="Tekrar">↺</button>
       </div>
 
       <!-- Arama -->
@@ -614,10 +713,12 @@ function saveFavs(f){ localStorage.setItem('mo_favs', JSON.stringify(f)); }
 
 function renderFavs(){
   const favs = getFavs();
-  const box = document.getElementById('fav-box');
   const list = document.getElementById('fav-list');
-  if(!favs.length){ box.style.display='none'; return; }
-  box.style.display='block';
+  if(!list) return;
+  if(!favs.length){
+    list.innerHTML='<div style="font-size:.7rem;color:rgba(255,255,255,.2);padding:10px 0;">Henüz favori oda yok</div>';
+    return;
+  }
   list.innerHTML = favs.map((f,i)=>`
     <div class="fav-item" onclick="quickJoin(${i})">
       <div class="fav-icon">🏠</div>
@@ -628,6 +729,13 @@ function renderFavs(){
       <button class="fav-enter" onclick="event.stopPropagation();quickJoin(${i})">Gir →</button>
       <button class="fav-del" onclick="event.stopPropagation();delFav(${i})" title="Favoriden çıkar">✕</button>
     </div>`).join('');
+}
+
+function setLTab(tab, btn){
+  document.querySelectorAll('.l-tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('lf-create').style.display = tab==='create' ? 'flex' : 'none';
+  document.getElementById('lf-join').style.display = tab==='join' ? 'flex' : 'none';
 }
 
 function quickJoin(i){
@@ -1161,12 +1269,10 @@ function updPB(){ document.getElementById('pb').textContent = S.playing ? '⏸' 
 function togShuffle(){
   S.shuffle=!S.shuffle;
   document.getElementById('shb').classList.toggle('on',S.shuffle);
-  document.getElementById('shb2').classList.toggle('on',S.shuffle);
 }
 function togRepeat(){
   S.repeat=!S.repeat;
   document.getElementById('rpb').classList.toggle('on',S.repeat);
-  document.getElementById('rpb2').classList.toggle('on',S.repeat);
 }
 
 // Progress bar tıklama — DOMContentLoaded'dan sonra bağla
