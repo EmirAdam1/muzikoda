@@ -194,7 +194,9 @@ body{
 /* RIGHT: music — Split Layout */
 .mpanel{
   width:380px;flex-shrink:0;
-  display:flex;flex-direction:column;overflow:hidden;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  height:100%;
   transition:width .3s ease,opacity .3s ease;
   border-left:1px solid var(--border);
   background:linear-gradient(180deg,#0d0e1a 0%,var(--bg) 100%);
@@ -360,11 +362,18 @@ body{
   display:flex;align-items:center;justify-content:space-between;
   padding:10px 16px 5px;
   font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.2);
+  flex-shrink:0;
 }
 .qlist{
   flex:1;overflow-y:auto;padding:0 8px 12px;
-  scrollbar-width:thin;scrollbar-color:var(--hover) transparent;
+  scrollbar-width:thin;scrollbar-color:rgba(91,106,245,.3) transparent;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
 }
+.qlist::-webkit-scrollbar{width:3px;}
+.qlist::-webkit-scrollbar-track{background:transparent;}
+.qlist::-webkit-scrollbar-thumb{background:rgba(91,106,245,.3);border-radius:100px;}
+.qlist::-webkit-scrollbar-thumb:hover{background:rgba(91,106,245,.6);}
 .qi{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:background .1s;}
 .qi:hover{background:rgba(255,255,255,.04);}
 .qi.now,.qi.active{background:rgba(91,106,245,.12);}
