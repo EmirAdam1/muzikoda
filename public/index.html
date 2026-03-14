@@ -578,7 +578,23 @@ body{
   }
   .left.m-active{ display:flex;flex-direction:column; }
 
-  .col-title{height:44px;padding:0 16px;font-size:.66rem;}
+  .col-title{
+    height:52px;padding:0 14px;font-size:.66rem;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .vc-btns{display:flex;gap:7px;}
+  .ib{
+    height:34px;border-radius:100px;
+    padding:0 12px;font-size:.7rem;font-weight:600;
+    display:flex;align-items:center;gap:5px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.05);
+    color:rgba(255,255,255,.5);cursor:pointer;
+    white-space:nowrap;
+  }
+  .ib.g{background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.3);color:#3ecf8e;}
+  .ib.r{background:rgba(240,92,92,.1);border-color:rgba(240,92,92,.3);color:#f05c5c;}
+  .ib.on{background:rgba(91,106,245,.12);border-color:rgba(91,106,245,.3);color:#a5b4fc;}
   .pgrid{
     flex-direction:column !important;
     padding:12px;gap:8px;overflow-y:auto;flex:1;
@@ -805,8 +821,8 @@ body{
     <div class="room-chip"><div class="dot"></div><span id="tb-room">oda</span></div>
     <div class="t-spacer"></div>
     <div class="t-right">
-      <button class="music-tog" id="mb" onclick="toggleMute()" title="Mikrofon">🎙️ Bağlı</button>
-      <button class="music-tog" id="vcb" onclick="toggleVoice()" title="Bağlan / Ayrıl">📞 Ses</button>
+      <button class="music-tog" onclick="toggleMute()" title="Mikrofon">🎙️ Bağlı</button>
+      <button class="music-tog" onclick="toggleVoice()" title="Bağlan / Ayrıl">📞 Ses</button>
       <button class="music-tog" id="fav-btn" onclick="toggleFav()" title="Favoriye ekle/çıkar">⭐</button>
       <button class="music-tog" id="mtog" onclick="toggleMusic()">🎵 Müzik</button>
       <div class="me-chip">
@@ -820,8 +836,11 @@ body{
     <!-- SOL: Sesli oda -->
     <div class="left">
       <div class="col-title">
-        🔊 Sesli Oda
-        <span class="vcst" id="vcst" style="font-size:.6rem;font-weight:500;color:var(--sub);text-transform:none;letter-spacing:0;">· bağlı değil</span>
+        <span>🔊 Sesli Oda <span class="vcst" id="vcst" style="font-size:.6rem;font-weight:500;color:var(--sub);text-transform:none;letter-spacing:0;">· bağlı değil</span></span>
+        <div class="vc-btns">
+          <button class="ib" id="mb" onclick="toggleMute()" title="Mikrofon">🎙️ Bağlı</button>
+          <button class="ib" id="vcb" onclick="toggleVoice()" title="Bağlan / Ayrıl">📞 Ses</button>
+        </div>
       </div>
       <div class="pgrid" id="pgrid"></div>
     </div>
@@ -1733,7 +1752,7 @@ function mInitMobile(){
   // Müzik panelini her zaman görünür yap (display:none override)
   const mp = document.getElementById('mp');
   if(mp){ mp.classList.remove('hide'); }
-  mSetTab('chat');
+  mSetTab('voice');
 }
 
 function mSetTab(tab){
