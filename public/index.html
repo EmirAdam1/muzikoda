@@ -1104,8 +1104,18 @@ function initSocket(){
 
   // Mevcut oda durumu (yeni katılımda)
   socket.on('state',({users,queue,cur,playing,position,serverTime})=>{
+    // Eski peer bağlantılarını temizle (yeniden bağlanma durumu)
+    Object.keys(pcs).forEach(pid=>{
+      pcs[pid].close();
+      delete pcs[pid];
+      document.getElementById('audio-'+pid)?.remove();
+    });
     users.forEach(n=>{if(n!==S.me)addP(n,false);});
     updateFavPass(); // şifreyi favori kaydında güncelle
+    // Ses açıksa yeniden voice-join gönder — diğerleri offer atsın
+    if(S.voiceOn && localStream){
+      setTimeout(()=>bc('voice-join',{}),500);
+    }
     if(queue?.length){
       S.queue=queue; renderQ();
       if(cur>=0){
@@ -1681,6 +1691,46 @@ function mkPc(pid){
     document.getElementById('rau').appendChild(a);
   };
   pc.onicecandidate=e=>{if(e.candidate)bc('ice',{to:pid,candidate:e.candidate});};
+
+  // Bağlantı durumu izle — kopunca otomatik yeniden bağlan
+  pc.oniceconnectionstatechange=()=>{
+    const st=pc.iceConnectionState;
+    console.log('[WebRTC] ICE state',pid,st);
+    if(st==='failed'||st==='disconnected'){
+      console.warn('[WebRTC] Bağlantı koptu:',pid,'— yeniden deneniyor...');
+      // 2 sn bekle, hâlâ kopuksa yeniden bağlan
+      setTimeout(async()=>{
+        if(!pcs[pid]) return; // zaten temizlendi
+        const cur=pcs[pid].iceConnectionState;
+        if(cur==='failed'||cur==='disconnected'||cur==='closed'){
+          console.log('[WebRTC] Yeniden bağlanıyor:',pid);
+          pcs[pid].close();
+          delete pcs[pid];
+          document.getElementById('audio-'+pid)?.remove();
+          // Sunucuya hâlâ bağlıysa yeniden offer gönder
+          if(S.voiceOn && localStream) await sendOffer(pid);
+        }
+      },2000);
+    }
+    if(st==='closed'){
+      delete pcs[pid];
+      document.getElementById('audio-'+pid)?.remove();
+    }
+  };
+
+  pc.onconnectionstatechange=()=>{
+    const st=pc.connectionState;
+    console.log('[WebRTC] Connection state',pid,st);
+    if(st==='failed'){
+      pcs[pid]?.close();
+      delete pcs[pid];
+      document.getElementById('audio-'+pid)?.remove();
+      if(S.voiceOn && localStream){
+        setTimeout(()=>sendOffer(pid),1000);
+      }
+    }
+  };
+
   return pc;
 }
 
