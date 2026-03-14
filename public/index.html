@@ -520,104 +520,181 @@ body{
 ═══════════════════════════════════ */
 @media (max-width: 700px) {
 
-  /* LANDING — tek sütun */
-  #landing{ padding:16px; align-items:stretch; }
-  .lcard{ flex-direction:column; max-width:100%; border-radius:18px; }
+  /* LANDING — tek sütun, kaydırılabilir */
+  body{ overflow:auto; height:auto; }
+  #landing{
+    padding:20px 16px 36px;
+    align-items:stretch;
+    height:auto;min-height:100vh;
+  }
+  .lcard{
+    flex-direction:column;max-width:100%;
+    border-radius:20px;box-shadow:none;
+  }
   .lcol-left{
     width:100%;border-right:none;
     border-bottom:1px solid rgba(255,255,255,.06);
-    padding:24px 22px 18px;
+    padding:24px 20px 20px;
   }
-  .l-feats{ gap:10px; margin-bottom:18px; }
-  .l-feat-ico{ width:30px;height:30px;font-size:.82rem; }
-  .l-feat-title{ font-size:.76rem; }
-  .l-feat-sub{ font-size:.6rem; }
-  .l-fav-section{ margin-top:16px; }
-  .lcol-right{ padding:22px 22px 24px; }
-  .l-right-title{ font-size:.95rem; }
-  .l-right-sub{ font-size:.7rem; margin-bottom:14px; }
-  .l-tabs{ margin-bottom:14px; }
-  .l-tab{ height:36px; font-size:.78rem; }
-  .f{ padding:11px 13px; font-size:.88rem; }
-  .btn{ padding:12px; font-size:.88rem; }
-  .l-footer{ display:none; }
+  .l-logo-icon{width:36px;height:36px;font-size:.95rem;}
+  .l-logo-name{font-size:1.15rem;}
+  .l-logo-tag{font-size:.65rem;margin-bottom:18px;}
+  .l-feats{flex-direction:row;gap:8px;margin-bottom:20px;}
+  .l-feat{
+    flex:1;flex-direction:column;align-items:center;text-align:center;
+    padding:10px 6px;border-radius:12px;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+  }
+  .l-feat-ico{width:30px;height:30px;font-size:.85rem;}
+  .l-feat-title{font-size:.7rem;}
+  .l-feat-sub{font-size:.58rem;}
+  .l-fav-section{margin-top:18px;}
+  .lcol-right{padding:22px 20px 26px;}
+  .l-right-title{font-size:.95rem;}
+  .l-right-sub{font-size:.7rem;margin-bottom:16px;}
+  .l-tabs{margin-bottom:16px;}
+  .l-tab{height:36px;font-size:.78rem;}
+  .f{padding:11px 13px;font-size:.88rem;}
+  .btn{padding:12px;font-size:.88rem;}
+  .l-footer{display:none;}
 
-  /* APP — toolbar */
-  .topbar{ padding:0 12px; gap:6px; height:48px; }
-  .t-brand{ font-size:.85rem; }
-  .room-chip{ padding:3px 9px; font-size:.65rem; }
-  /* Toolbar'da sadece önemli butonlar */
-  #vcb{ font-size:.65rem; padding:4px 8px; }
-  #mb{ font-size:.65rem; padding:4px 8px; }
-  #fav-btn{ font-size:.65rem; padding:4px 8px; }
-  #mtog{ font-size:.65rem; padding:4px 8px; }
-  .me-chip span{ display:none; } /* ismi gizle, sadece avatar */
+  /* APP — tam ekran, alt nav */
+  #app{ height:100vh;height:100dvh; }
+  .topbar{ display:none; } /* toolbar gizle, alt nav alır */
 
-  /* APP — body: dikey stack */
-  .main{ flex-direction:column; }
+  .main{
+    flex-direction:column;
+    height:calc(100% - 56px); /* alt nav yüksekliği kadar */
+  }
 
-  /* Sol sesli oda — yatay şerit üstte */
+  /* Sol sesli oda — gizle, sekmeyle göster */
   .left{
+    display:none;
     width:100% !important;
-    height:auto;flex-shrink:0;
+    height:100%;
     border-right:none;
-    border-bottom:1px solid rgba(255,255,255,.06);
-    background:#0c0d13;
+    border-bottom:none;
+    background:#0e0f14;
   }
-  .col-title{ height:36px; font-size:.6rem; padding:0 12px; }
+  .left.m-active{ display:flex;flex-direction:column; }
+
+  .col-title{height:44px;padding:0 16px;font-size:.66rem;}
   .pgrid{
-    flex-direction:row !important;
-    flex-wrap:wrap;
-    padding:8px 10px;gap:6px;
+    flex-direction:column !important;
+    padding:12px;gap:8px;overflow-y:auto;flex:1;
   }
   .pcard{
-    flex-direction:column;
-    padding:8px 10px;gap:4px;
-    min-width:64px;
-    align-items:center;
+    padding:11px 14px;border-radius:13px;
+    background:rgba(255,255,255,.04);border:1px solid transparent;
   }
-  .pname{ font-size:.65rem; text-align:center; }
-  .pmic{ font-size:.6rem; }
+  .pcard.spk{background:rgba(62,207,142,.06);border-color:rgba(62,207,142,.2);}
+  .p-av-wrap .av{width:38px !important;height:38px !important;border-radius:11px !important;font-size:.7rem !important;}
+  .pname{font-size:.84rem;}
+  .pmic{font-size:.76rem;}
 
-  /* Orta chat — flex:1 */
-  .chat{ flex:1; min-height:0; }
-  .msgs{ padding:8px 12px; }
-  .mtxt{ font-size:.84rem; }
-  .cinput{ padding:8px 10px; }
-  .cf{ font-size:.84rem; padding:8px 11px; }
-  .sbtn{ width:34px;height:34px;font-size:.82rem; }
+  /* Chat — gizle, sekmeyle göster */
+  .chat{
+    display:none;
+    flex:1;flex-direction:column;
+    border-right:none;
+  }
+  .chat.m-active{ display:flex; }
+  .ch{height:44px;display:flex;align-items:center;padding:0 16px;font-size:.65rem;}
+  .msgs{padding:10px 12px;gap:2px;}
+  .mtxt{font-size:.86rem;}
+  .cinput{padding:9px 12px;}
+  .cf{font-size:.86rem;padding:10px 12px;}
+  .sbtn{
+    width:40px;height:40px;
+    background:linear-gradient(135deg,var(--accent),#8b5cf6);
+    box-shadow:0 3px 12px rgba(91,106,245,.35);
+  }
+  .sbtn:hover{transform:none;}
 
-  /* Müzik paneli — tam genişlik altta */
+  /* Müzik paneli — gizle, sekmeyle göster */
   .mpanel{
+    display:none !important;
     width:100% !important;
     border-left:none !important;
-    border-top:1px solid rgba(255,255,255,.06);
-    max-height:55vh;
+    border-top:none;
+    height:100%;
+    max-height:none;
   }
-  .np-split{ padding:10px 12px 6px; }
-  .np-art{ width:90px;height:90px;border-radius:11px; }
-  .np-title{ font-size:.85rem; }
-  .np-artist{ font-size:.62rem; }
-  .np-mini-ctrls{ gap:4px; margin-top:6px; }
-  .np-mb{ width:26px;height:26px;font-size:.78rem; }
-  .np-mplay{ width:30px;height:30px;font-size:.82rem; }
-  .prog-wrap{ padding:4px 12px 5px; }
-  .mp-bottom{ padding:4px 12px 8px; }
-  .search-row, [style*="padding:10px 12px 6px"]{ padding:6px 10px 4px !important; }
-  .af{ font-size:.74rem; padding:8px 10px; }
-  .qhead{ padding:6px 12px 3px; }
-  .qlist{ padding:0 6px 8px; }
-  .qi{ padding:6px 8px; }
-  .qi-title{ font-size:.78rem; }
-  .qi-ch{ font-size:.6rem; }
+  .mpanel.m-active{
+    display:flex !important;
+    flex-direction:column;
+  }
+  /* Müzik sıra listesi — kaydırılabilir */
+  .qlist{
+    flex:1;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+
+  .np-split{padding:14px 14px 8px;}
+  .np-art{width:96px;height:96px;border-radius:13px;}
+  .np-title{font-size:.92rem;}
+  .np-artist{font-size:.64rem;}
+  .np-mini-ctrls{gap:5px;margin-top:8px;}
+  .np-mb{width:30px;height:30px;font-size:.84rem;}
+  .np-mplay{width:36px;height:36px;font-size:.95rem;}
+  .prog-wrap{padding:4px 14px 6px;}
+  .mp-bottom{padding:5px 14px 9px;}
+  .vol-slider{height:4px;}
+  .vol-icon{width:28px;height:28px;}
+
+  /* Alt navigasyon */
+  .m-bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;
+    height:56px;
+    display:flex;
+    background:#0b0c14;
+    border-top:1px solid rgba(255,255,255,.06);
+    z-index:100;
+  }
+  .m-nav-btn{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:3px;
+    cursor:pointer;transition:all .15s;
+    border:none;background:none;font-family:inherit;
+  }
+  .m-nav-ico{font-size:1.15rem;line-height:1;}
+  .m-nav-lbl{font-size:.55rem;font-weight:600;color:rgba(255,255,255,.28);transition:color .15s;}
+  .m-nav-btn.on .m-nav-lbl{color:#a5b4fc;}
+
+  /* Mobil header */
+  .m-top-bar{
+    display:flex !important;
+    height:48px;
+    align-items:center;justify-content:space-between;
+    padding:0 16px;
+    background:#0b0c14;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    flex-shrink:0;
+  }
+  .m-top-left{display:flex;align-items:center;gap:8px;}
+  .m-top-logo{font-size:.9rem;font-weight:900;letter-spacing:-.03em;}
+  .m-top-chip{
+    display:flex;align-items:center;gap:5px;
+    background:rgba(91,106,245,.1);border:1px solid rgba(91,106,245,.2);
+    border-radius:100px;padding:3px 10px;
+    font-size:.64rem;font-weight:600;color:#a5b4fc;
+  }
+  .m-top-right{display:flex;align-items:center;gap:8px;}
+  .m-top-fav{font-size:.9rem;background:none;border:none;cursor:pointer;}
+  .m-top-av{
+    width:28px;height:28px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.6rem;font-weight:800;
+  }
 }
 
-/* Çok küçük ekranlar (375px altı) */
 @media (max-width: 375px) {
-  .lcol-left{ padding:18px 16px 14px; }
-  .lcol-right{ padding:18px 16px 20px; }
-  .l-logo-name{ font-size:1.05rem; }
-  .topbar .room-chip{ display:none; }
+  .lcol-left{padding:18px 14px 16px;}
+  .lcol-right{padding:18px 14px 22px;}
+  .l-logo-name{font-size:1rem;}
+  .l-feat-title{font-size:.62rem;}
 }
 </style>
 </head>
@@ -708,6 +785,17 @@ body{
 
 <!-- APP -->
 <div id="app">
+  <!-- MOBİL HEADER (sadece mobilde görünür) -->
+  <div class="m-top-bar" id="m-top-bar" style="display:none;">
+    <div class="m-top-left">
+      <div class="m-top-logo">MüzikOda</div>
+      <div class="m-top-chip"><div class="dot"></div><span id="m-tb-room">oda</span></div>
+    </div>
+    <div class="m-top-right">
+      <button class="m-top-fav" id="m-fav-btn" onclick="toggleFav()">⭐</button>
+      <div class="m-top-av c0" id="m-me-av"></div>
+    </div>
+  </div>
   <!-- TOOLBAR -->
   <div class="topbar">
     <div class="t-brand">
@@ -812,6 +900,22 @@ body{
       <div class="qhead"><span>Sıra</span><span id="qc" style="color:var(--accent)">0</span></div>
       <div class="qlist" id="ql"><div style="text-align:center;color:var(--sub);font-size:.8rem;padding:18px 0">Henüz şarkı yok</div></div>
     </div>
+  </div>
+
+  <!-- MOBİL ALT NAVİGASYON -->
+  <div class="m-bottom-nav" id="m-bottom-nav" style="display:none;">
+    <button class="m-nav-btn on" id="mnav-voice" onclick="mSetTab('voice')">
+      <span class="m-nav-ico">🔊</span>
+      <span class="m-nav-lbl">Ses</span>
+    </button>
+    <button class="m-nav-btn" id="mnav-chat" onclick="mSetTab('chat')">
+      <span class="m-nav-ico">💬</span>
+      <span class="m-nav-lbl">Sohbet</span>
+    </button>
+    <button class="m-nav-btn" id="mnav-music" onclick="mSetTab('music')">
+      <span class="m-nav-ico">🎵</span>
+      <span class="m-nav-lbl">Müzik</span>
+    </button>
   </div>
 </div>
 
@@ -944,6 +1048,8 @@ function go(name,room,creator,pass=''){
   S.me=name; S.room=room; S.pass=pass;
   document.getElementById('landing').style.display='none';
   document.getElementById('app').classList.add('on');
+  // Mobil kontrol
+  if(window.innerWidth<=700){ mInitMobile(); }
   document.getElementById('tb-room').textContent=room;
   document.getElementById('tb-me').textContent=name;
   const av=document.getElementById('me-av');
@@ -1609,6 +1715,69 @@ function T(text,icon='ℹ️'){
 }
 
 window.addEventListener('load',()=>{const h=location.hash.slice(1);if(h)document.getElementById('jr').value=h;});
+
+// ══ MOBİL SEKME SİSTEMİ ══
+function mInitMobile(){
+  document.getElementById('m-top-bar').style.display='flex';
+  document.getElementById('m-bottom-nav').style.display='flex';
+  // oda adı + avatar senkron et
+  const room = document.getElementById('tb-room')?.textContent;
+  const me = document.getElementById('tb-me')?.textContent;
+  const meAv = document.getElementById('me-av');
+  if(room) document.getElementById('m-tb-room').textContent=room;
+  if(meAv && document.getElementById('m-me-av')){
+    document.getElementById('m-me-av').className = meAv.className.replace('c0','').trim() + ' ' + (meAv.className.match(/c\d/)?.[0]||'c0');
+    document.getElementById('m-me-av').textContent = meAv.textContent;
+    document.getElementById('m-me-av').style.cssText = meAv.style.cssText;
+  }
+  // Müzik panelini her zaman görünür yap (display:none override)
+  const mp = document.getElementById('mp');
+  if(mp){ mp.classList.remove('hide'); }
+  mSetTab('chat');
+}
+
+function mSetTab(tab){
+  // Tüm panelleri gizle
+  document.querySelector('.left')?.classList.remove('m-active');
+  document.querySelector('.chat')?.classList.remove('m-active');
+  const mp = document.getElementById('mp');
+  if(mp) mp.classList.remove('m-active');
+
+  // Nav butonlarını sıfırla
+  ['voice','chat','music'].forEach(t=>{
+    const btn = document.getElementById('mnav-'+t);
+    if(btn) btn.classList.remove('on');
+  });
+
+  // Seçilen sekmeyi göster
+  if(tab==='voice'){
+    document.querySelector('.left')?.classList.add('m-active');
+    document.getElementById('mnav-voice')?.classList.add('on');
+  } else if(tab==='chat'){
+    document.querySelector('.chat')?.classList.add('m-active');
+    document.getElementById('mnav-chat')?.classList.add('on');
+  } else if(tab==='music'){
+    if(mp) mp.classList.add('m-active');
+    document.getElementById('mnav-music')?.classList.add('on');
+  }
+}
+
+// Ekran boyutu değişirse kontrol et
+window.addEventListener('resize',()=>{
+  if(window.innerWidth<=700 && document.getElementById('app').classList.contains('on')){
+    if(document.getElementById('m-bottom-nav').style.display==='none'){
+      mInitMobile();
+    }
+  } else if(window.innerWidth>700){
+    document.getElementById('m-top-bar').style.display='none';
+    document.getElementById('m-bottom-nav').style.display='none';
+    // Panelleri tekrar göster
+    document.querySelector('.left')?.classList.remove('m-active');
+    document.querySelector('.chat')?.classList.remove('m-active');
+    const mp = document.getElementById('mp');
+    if(mp) mp.classList.remove('m-active');
+  }
+});
 </script>
 </body>
 </html>
