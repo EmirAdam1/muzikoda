@@ -1330,7 +1330,8 @@ async function toggleVoice(){
   const b=document.getElementById('vcb'),st=document.getElementById('vcst');
   if(!S.voiceOn){
     try{
-      localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+      // Kulaklık mikrofonunu önceliklendir
+      localStream = await getBestMic();
       S.voiceOn=true;b.classList.add('on');b.textContent='📞 Bağlı';
       st.textContent='· bağlı';st.style.color='var(--green)';
       setupVAD(localStream);upP(S.me,{micOn:true});
@@ -1355,6 +1356,40 @@ function toggleMute(){
   else{b.classList.remove('on');b.style.color='';b.textContent='🎙️ Bağlı';}
   T(S.muted?'Mikrofon kapalı 🔇':'Mikrofon açık 🎙️','ℹ️');
 }
+async function getBestMic(){
+  // Önce izin al (cihaz listesi için gerekli)
+  const base = await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+  base.getTracks().forEach(t=>t.stop()); // izin aldık, şimdi doğru cihazı seç
+
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const mics = devices.filter(d=>d.kind==='audioinput');
+
+  // Kulaklık / headset / headphone içeren cihazı önceliklendir
+  const headsetKeywords = ['headset','headphone','kulaklık','earphone','jabra','sennheiser','bose','sony','plantronics','logitech','hyperx','razer','steelseries','corsair','usb','wireless'];
+  const headset = mics.find(m=>headsetKeywords.some(k=>m.label.toLowerCase().includes(k)));
+
+  if(headset){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({audio:{deviceId:{exact:headset.deviceId}},video:false});
+      console.log('[MüzikOda] Kulaklık mik seçildi:', headset.label);
+      return stream;
+    }catch(e){
+      console.warn('[MüzikOda] Kulaklık mik başarısız, varsayılana dönülüyor:', e);
+    }
+  }
+
+  // Kulaklık bulunamadı — en iyi ses kalitesiyle varsayılan
+  console.log('[MüzikOda] Varsayılan mik kullanılıyor');
+  return await navigator.mediaDevices.getUserMedia({
+    audio:{
+      echoCancellation:true,
+      noiseSuppression:true,
+      autoGainControl:true
+    },
+    video:false
+  });
+}
+
 function setupVAD(stream){
   try{
     const ctx=new AudioContext(),an=ctx.createAnalyser();an.fftSize=256;
