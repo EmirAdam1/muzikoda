@@ -514,6 +514,111 @@ body{
 .toast.on{transform:translateX(-50%) translateY(0);}
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-thumb{background:var(--card);border-radius:100px;}
+
+/* ═══════════════════════════════════
+   MOBİL (max-width: 700px)
+═══════════════════════════════════ */
+@media (max-width: 700px) {
+
+  /* LANDING — tek sütun */
+  #landing{ padding:16px; align-items:stretch; }
+  .lcard{ flex-direction:column; max-width:100%; border-radius:18px; }
+  .lcol-left{
+    width:100%;border-right:none;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    padding:24px 22px 18px;
+  }
+  .l-feats{ gap:10px; margin-bottom:18px; }
+  .l-feat-ico{ width:30px;height:30px;font-size:.82rem; }
+  .l-feat-title{ font-size:.76rem; }
+  .l-feat-sub{ font-size:.6rem; }
+  .l-fav-section{ margin-top:16px; }
+  .lcol-right{ padding:22px 22px 24px; }
+  .l-right-title{ font-size:.95rem; }
+  .l-right-sub{ font-size:.7rem; margin-bottom:14px; }
+  .l-tabs{ margin-bottom:14px; }
+  .l-tab{ height:36px; font-size:.78rem; }
+  .f{ padding:11px 13px; font-size:.88rem; }
+  .btn{ padding:12px; font-size:.88rem; }
+  .l-footer{ display:none; }
+
+  /* APP — toolbar */
+  .topbar{ padding:0 12px; gap:6px; height:48px; }
+  .t-brand{ font-size:.85rem; }
+  .room-chip{ padding:3px 9px; font-size:.65rem; }
+  /* Toolbar'da sadece önemli butonlar */
+  #vcb{ font-size:.65rem; padding:4px 8px; }
+  #mb{ font-size:.65rem; padding:4px 8px; }
+  #fav-btn{ font-size:.65rem; padding:4px 8px; }
+  #mtog{ font-size:.65rem; padding:4px 8px; }
+  .me-chip span{ display:none; } /* ismi gizle, sadece avatar */
+
+  /* APP — body: dikey stack */
+  .main{ flex-direction:column; }
+
+  /* Sol sesli oda — yatay şerit üstte */
+  .left{
+    width:100% !important;
+    height:auto;flex-shrink:0;
+    border-right:none;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    background:#0c0d13;
+  }
+  .col-title{ height:36px; font-size:.6rem; padding:0 12px; }
+  .pgrid{
+    flex-direction:row !important;
+    flex-wrap:wrap;
+    padding:8px 10px;gap:6px;
+  }
+  .pcard{
+    flex-direction:column;
+    padding:8px 10px;gap:4px;
+    min-width:64px;
+    align-items:center;
+  }
+  .pname{ font-size:.65rem; text-align:center; }
+  .pmic{ font-size:.6rem; }
+
+  /* Orta chat — flex:1 */
+  .chat{ flex:1; min-height:0; }
+  .msgs{ padding:8px 12px; }
+  .mtxt{ font-size:.84rem; }
+  .cinput{ padding:8px 10px; }
+  .cf{ font-size:.84rem; padding:8px 11px; }
+  .sbtn{ width:34px;height:34px;font-size:.82rem; }
+
+  /* Müzik paneli — tam genişlik altta */
+  .mpanel{
+    width:100% !important;
+    border-left:none !important;
+    border-top:1px solid rgba(255,255,255,.06);
+    max-height:55vh;
+  }
+  .np-split{ padding:10px 12px 6px; }
+  .np-art{ width:90px;height:90px;border-radius:11px; }
+  .np-title{ font-size:.85rem; }
+  .np-artist{ font-size:.62rem; }
+  .np-mini-ctrls{ gap:4px; margin-top:6px; }
+  .np-mb{ width:26px;height:26px;font-size:.78rem; }
+  .np-mplay{ width:30px;height:30px;font-size:.82rem; }
+  .prog-wrap{ padding:4px 12px 5px; }
+  .mp-bottom{ padding:4px 12px 8px; }
+  .search-row, [style*="padding:10px 12px 6px"]{ padding:6px 10px 4px !important; }
+  .af{ font-size:.74rem; padding:8px 10px; }
+  .qhead{ padding:6px 12px 3px; }
+  .qlist{ padding:0 6px 8px; }
+  .qi{ padding:6px 8px; }
+  .qi-title{ font-size:.78rem; }
+  .qi-ch{ font-size:.6rem; }
+}
+
+/* Çok küçük ekranlar (375px altı) */
+@media (max-width: 375px) {
+  .lcol-left{ padding:18px 16px 14px; }
+  .lcol-right{ padding:18px 16px 20px; }
+  .l-logo-name{ font-size:1.05rem; }
+  .topbar .room-chip{ display:none; }
+}
 </style>
 </head>
 <body>
@@ -1427,9 +1532,18 @@ function mkPc(pid){
       {urls:'stun:stun.l.google.com:19302'},
       {urls:'stun:stun1.l.google.com:19302'},
       {urls:'stun:stun2.l.google.com:19302'},
+      {urls:'stun:stun3.l.google.com:19302'},
+      {urls:'stun:stun4.l.google.com:19302'},
+      {urls:'stun:stun.cloudflare.com:3478'},
       {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
       {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},
-    ]
+      {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'},
+      {urls:'turn:freeturn.net:3478',username:'free',credential:'free'},
+      {urls:'turns:freeturn.net:5349',username:'free',credential:'free'},
+    ],
+    iceCandidatePoolSize:10,
+    bundlePolicy:'max-bundle',
+    rtcpMuxPolicy:'require',
   });
   pcs[pid]=pc;
   localStream?.getTracks().forEach(t=>pc.addTrack(t,localStream));
