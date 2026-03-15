@@ -810,9 +810,12 @@ body{
       <div class="l-right-sub">Yeni oda oluştur veya mevcut odaya katıl</div>
 
       <!-- Kalıcı Oda Butonu -->
-      <button class="perm-btn" onclick="openPermRoom()">
+      <button class="perm-btn" onclick="openPermRoom(false)">
         🏠 Ana Oda'ya Gir
       </button>
+      <div style="text-align:right;margin-top:-6px;margin-bottom:10px;">
+        <button onclick="openPermRoom(true)" style="background:none;border:none;color:rgba(255,255,255,.2);font-family:inherit;font-size:.62rem;cursor:pointer;padding:0;transition:color .15s;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">⚡ Yönetici girişi</button>
+      </div>
       <div class="perm-divider">ya da</div>
 
       <div class="l-tabs">
@@ -992,13 +995,15 @@ body{
 <div class="perm-modal" id="perm-modal" style="display:none;" onclick="if(event.target===this)closePermModal()">
   <div class="perm-modal-box" style="position:relative;">
     <button class="perm-modal-close" onclick="closePermModal()">✕</button>
-    <div class="perm-modal-title">🏠 Ana Oda</div>
-    <div class="perm-modal-sub">Kalıcı oda — sohbet geçmişi ve müzik korunur</div>
+    <div class="perm-modal-title" id="perm-modal-title">🏠 Ana Oda</div>
+    <div class="perm-modal-sub" id="perm-modal-sub">Adını gir ve katıl</div>
     <div class="lbl" style="margin-bottom:6px;">Adın</div>
     <input class="f" id="perm-name" placeholder="Adını gir..." maxlength="20" style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')joinPermRoom();">
-    <div class="lbl" style="margin-bottom:6px;">Yönetici Şifresi <span style="text-transform:none;letter-spacing:0;font-weight:400;opacity:.5;">(opsiyonel)</span></div>
-    <input class="f" id="perm-pass" placeholder="Yönetici şifresi..." maxlength="32" style="margin-bottom:16px;" onkeydown="if(event.key==='Enter')joinPermRoom();">
-    <button class="btn btn-p" onclick="joinPermRoom()">🏠 Ana Oda'ya Gir</button>
+    <div id="perm-pass-row" style="display:none;">
+      <div class="lbl" style="margin-bottom:6px;">Yönetici Şifresi</div>
+      <input class="f" id="perm-pass" placeholder="Şifreyi gir..." maxlength="32" style="margin-bottom:16px;" onkeydown="if(event.key==='Enter')joinPermRoom();">
+    </div>
+    <button class="btn btn-p" id="perm-modal-btn" onclick="joinPermRoom()">🏠 Ana Oda'ya Gir</button>
   </div>
 </div>
 
@@ -1154,7 +1159,7 @@ function goConfirmed(){
   const av=document.getElementById('me-av');
   av.textContent=ini(S.me); av.className=`av ${col(S.me)}`;
   window.location.hash=S.room;
-  addP(S.me,true);
+  addP(S.me,true,false); // kendi isAdmin durumu state'ten sonra güncellenir
   sys(`${S.me} odaya katıldı`);
   T(S.creator?`"${S.room}" oluşturuldu 🎉`:`"${S.room}" odasına katıldın 🚀`,'✅');
   updateQuotaUI();
@@ -1198,14 +1203,18 @@ function initSocket(){
       pcs[pid].close(); delete pcs[pid];
       document.getElementById('audio-'+pid)?.remove();
     });
-    users.forEach(n=>{if(n!==S.me)addP(n,false);});
+    users.forEach(u=>{ const nm=typeof u==='string'?u:u.name; const ia=u.isAdmin||false; if(nm!==S.me)addP(nm,false,ia); });
     updateFavPass();
     if(S.voiceOn && localStream){ setTimeout(()=>bc('voice-join',{}),500); }
     // Kalıcı oda
     S.isPermanent = isPermanent;
     S.isAdmin = isAdmin;
     S.isMuted = isMuted||false;
-    if(isAdmin){ document.getElementById('admin-btn').style.display='flex'; }
+    if(isAdmin){
+      document.getElementById('admin-btn').style.display='flex';
+      if(S.peers[S.me]) S.peers[S.me].isAdmin=true;
+      renderP();
+    }
     // Sohbet geçmişini yükle
     if(chatHistory?.length){
       chatHistory.forEach(m=>renderMsg(m.name, m.text, m.name===S.me, m.id));
@@ -1891,8 +1900,19 @@ window.addEventListener('load',()=>{const h=location.hash.slice(1);if(h)document
 // ══ KALICI ODA ══
 const PERM_ROOM_ID = 'ana-oda';
 
-function openPermRoom(){
-  document.getElementById('perm-modal').style.display='flex';
+function openPermRoom(adminMode){
+  const modal = document.getElementById('perm-modal');
+  const passRow = document.getElementById('perm-pass-row');
+  const title = document.getElementById('perm-modal-title');
+  const sub = document.getElementById('perm-modal-sub');
+  const btn = document.getElementById('perm-modal-btn');
+  modal._adminMode = !!adminMode;
+  passRow.style.display = adminMode ? 'block' : 'none';
+  title.textContent = adminMode ? '⚡ Yönetici Girişi' : '🏠 Ana Oda';
+  sub.textContent = adminMode ? 'Yönetici şifresiyle giriş yap' : 'Adını gir ve katıl';
+  btn.textContent = adminMode ? '⚡ Yönetici Olarak Gir' : '🏠 Ana Oda'ya Gir';
+  if(document.getElementById('perm-pass')) document.getElementById('perm-pass').value='';
+  modal.style.display='flex';
   setTimeout(()=>document.getElementById('perm-name').focus(),100);
 }
 function closePermModal(){
@@ -1900,9 +1920,11 @@ function closePermModal(){
 }
 function joinPermRoom(){
   const name = document.getElementById('perm-name').value.trim();
-  const pass = document.getElementById('perm-pass').value.trim();
   if(!name){ T('Adını gir!','❌'); return; }
-  if(!pass){ T('Şifreyi gir!','❌'); return; }
+  const modal = document.getElementById('perm-modal');
+  const adminMode = modal._adminMode;
+  const pass = adminMode ? (document.getElementById('perm-pass').value.trim()) : '';
+  if(adminMode && !pass){ T('Yönetici şifresini gir!','❌'); return; }
   closePermModal();
   go(name, PERM_ROOM_ID, false, pass);
 }
