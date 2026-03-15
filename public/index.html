@@ -1151,7 +1151,9 @@ function go(name,room,creator,pass=''){
   initSocket();
 }
 function goConfirmed(){
-  document.getElementById('landing').style.display='none';
+  const landingEl = document.getElementById('landing');
+  landingEl.style.display='none';
+  landingEl.style.visibility='hidden';
   document.getElementById('app').classList.add('on');
   if(window.innerWidth<=700){ mInitMobile(); }
   document.getElementById('tb-room').textContent=S.room;
@@ -1170,8 +1172,8 @@ function goConfirmed(){
 function initSocket(){
   if(socket){ socket.disconnect(); socket=null; }
   socket=io();
-
-  socket.on('connect',()=>{
+  // once: sadece ilk connect'te join gönder
+  socket.once('connect',()=>{
     socket.emit('join',{room:S.room, name:S.me, pass:S.pass||'', create:S.creator||false});
   });
 
@@ -1188,7 +1190,8 @@ function initSocket(){
     T('Şifre yanlış! ❌','❌');
     if(socket){ socket.disconnect(); socket=null; }
     document.getElementById('app').classList.remove('on');
-    document.getElementById('landing').style.display='flex';
+    const ld=document.getElementById('landing');
+    ld.style.display='flex'; ld.style.visibility='visible';
     window.location.hash='';
     const cp=document.getElementById('cp'); if(cp) cp.value='';
     const jp=document.getElementById('jp'); if(jp) jp.value='';
