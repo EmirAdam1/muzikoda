@@ -39,7 +39,15 @@ function getCurrentPosition(r) {
 
 io.on('connection', (socket) => {
 
-  socket.on('join', ({ room, name, pass }) => {
+  socket.on('join', ({ room, name, pass, create }) => {
+    const existing = rooms[room] && Object.keys(rooms[room].users).length > 0;
+
+    // Oda kur modunda ama oda zaten varsa hata döndür
+    if(create && existing) {
+      socket.emit('room-exists');
+      return;
+    }
+
     socket.join(room);
     socket.data.room = room;
     socket.data.name = name;
