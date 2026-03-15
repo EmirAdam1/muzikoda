@@ -195,7 +195,7 @@ body{
   font-size:.65rem;font-weight:700;text-transform:uppercase;
   letter-spacing:.08em;color:rgba(255,255,255,.28);flex-shrink:0;
 }
-.vc-btns{display:flex;gap:6px;}
+.vc-btns{display:none;gap:6px;} /* sadece mobilde görünür */
 .ib{
   width:30px;height:30px;border-radius:9px;
   border:1px solid rgba(255,255,255,.07);
@@ -821,8 +821,6 @@ body{
     <div class="room-chip"><div class="dot"></div><span id="tb-room">oda</span></div>
     <div class="t-spacer"></div>
     <div class="t-right">
-      <button class="music-tog" onclick="toggleMute()" title="Mikrofon">🎙️ Bağlı</button>
-      <button class="music-tog" onclick="toggleVoice()" title="Bağlan / Ayrıl">📞 Ses</button>
       <button class="music-tog" id="fav-btn" onclick="toggleFav()" title="Favoriye ekle/çıkar">⭐</button>
       <button class="music-tog" id="mtog" onclick="toggleMusic()">🎵 Müzik</button>
       <div class="me-chip">
@@ -1064,20 +1062,22 @@ function joinRoom(){
   go(n,r,false,p);
 }
 function go(name,room,creator,pass=''){
-  S.me=name; S.room=room; S.pass=pass;
+  S.me=name; S.room=room; S.pass=pass; S.creator=creator;
+  // Önce socket bağlan, onay geldikten sonra UI göster
+  initSocket();
+}
+function goConfirmed(){
   document.getElementById('landing').style.display='none';
   document.getElementById('app').classList.add('on');
-  // Mobil kontrol
   if(window.innerWidth<=700){ mInitMobile(); }
-  document.getElementById('tb-room').textContent=room;
-  document.getElementById('tb-me').textContent=name;
+  document.getElementById('tb-room').textContent=S.room;
+  document.getElementById('tb-me').textContent=S.me;
   const av=document.getElementById('me-av');
-  av.textContent=ini(name); av.className=`av ${col(name)}`;
-  window.location.hash=room;
-  initSocket();
-  addP(name,true);
-  sys(`${name} odaya katıldı`);
-  T(creator?`"${room}" oluşturuldu 🎉`:`"${room}" odasına katıldın 🚀`,'✅');
+  av.textContent=ini(S.me); av.className=`av ${col(S.me)}`;
+  window.location.hash=S.room;
+  addP(S.me,true);
+  sys(`${S.me} odaya katıldı`);
+  T(S.creator?`"${S.room}" oluşturuldu 🎉`:`"${S.room}" odasına katıldın 🚀`,'✅');
   updateQuotaUI();
   updFavBtn();
 }
@@ -1086,11 +1086,21 @@ function go(name,room,creator,pass=''){
 function initSocket(){
   socket=io();
 
-  socket.emit('join',{room:S.room, name:S.me, pass:S.pass||''});
+  socket.emit('join',{room:S.room, name:S.me, pass:S.pass||'', create:S.creator||false});
+
+  socket.on('room-exists',()=>{
+    // Henüz uygulamaya geçilmedi, sadece toast göster
+    T('Bu isimde bir oda zaten var! "Odaya Katıl" bölümünü kullan.','❌');
+    socket.disconnect();
+    socket=null;
+    S.me=''; S.room=''; S.creator=false;
+    // Landing zaten görünürde, bir şey yapmaya gerek yok
+  });
 
   socket.on('wrong-pass',()=>{
     T('Şifre yanlış! ❌','❌');
-    // App'i kapat, landing'e dön
+    socket.disconnect(); socket=null;
+    // App açılmadıysa zaten landing görünür, açıldıysa geri dön
     document.getElementById('app').classList.remove('on');
     document.getElementById('landing').style.display='flex';
     window.location.hash='';
@@ -1104,6 +1114,10 @@ function initSocket(){
 
   // Mevcut oda durumu (yeni katılımda)
   socket.on('state',({users,queue,cur,playing,position,serverTime})=>{
+    // İlk bağlantıda UI'ı göster
+    if(!document.getElementById('app').classList.contains('on')){
+      goConfirmed();
+    }
     // Eski peer bağlantılarını temizle (yeniden bağlanma durumu)
     Object.keys(pcs).forEach(pid=>{
       pcs[pid].close();
