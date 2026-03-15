@@ -1168,9 +1168,12 @@ function goConfirmed(){
 
 // SOCKET.IO
 function initSocket(){
+  if(socket){ socket.disconnect(); socket=null; }
   socket=io();
 
-  socket.emit('join',{room:S.room, name:S.me, pass:S.pass||'', create:S.creator||false});
+  socket.on('connect',()=>{
+    socket.emit('join',{room:S.room, name:S.me, pass:S.pass||'', create:S.creator||false});
+  });
 
   socket.on('room-exists',()=>{
     // Henüz uygulamaya geçilmedi, sadece toast göster
@@ -1183,16 +1186,13 @@ function initSocket(){
 
   socket.on('wrong-pass',()=>{
     T('Şifre yanlış! ❌','❌');
-    socket.disconnect(); socket=null;
-    // App açılmadıysa zaten landing görünür, açıldıysa geri dön
+    if(socket){ socket.disconnect(); socket=null; }
     document.getElementById('app').classList.remove('on');
     document.getElementById('landing').style.display='flex';
     window.location.hash='';
-    // Şifre alanlarını temizle
-    document.getElementById('cp').value='';
-    document.getElementById('jp').value='';
-    // Socket'i kapat
-    if(socket){ socket.disconnect(); socket=null; }
+    const cp=document.getElementById('cp'); if(cp) cp.value='';
+    const jp=document.getElementById('jp'); if(jp) jp.value='';
+    const pp=document.getElementById('perm-pass'); if(pp) pp.value='';
     S.me=''; S.room=''; S.pass='';
   });
 
