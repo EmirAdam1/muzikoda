@@ -127,6 +127,52 @@ body{
 .l-footer{margin-top:auto;padding-top:16px;font-size:.6rem;color:rgba(255,255,255,.15);display:flex;align-items:center;gap:5px;}
 .l-footer-dot{width:3px;height:3px;border-radius:50%;background:var(--accent);opacity:.5;}
 
+/* Kalıcı oda butonu */
+.perm-btn{
+  width:100%;height:48px;
+  background:linear-gradient(135deg,rgba(91,106,245,.15),rgba(139,92,246,.15));
+  border:1px solid rgba(91,106,245,.3);
+  border-radius:12px;color:#a5b4fc;
+  font-family:inherit;font-size:.88rem;font-weight:700;
+  cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-bottom:12px;
+}
+.perm-btn:hover{background:linear-gradient(135deg,rgba(91,106,245,.25),rgba(139,92,246,.25));border-color:rgba(91,106,245,.5);color:#fff;transform:translateY(-1px);}
+.perm-divider{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:.72rem;margin-bottom:12px;}
+.perm-divider::before,.perm-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Kalıcı oda modal */
+.perm-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1000;padding:20px;backdrop-filter:blur(4px);
+}
+.perm-modal-box{
+  background:#0e0f14;border:1px solid rgba(91,106,245,.2);
+  border-radius:20px;padding:28px;width:100%;max-width:380px;
+}
+.perm-modal-title{font-size:1rem;font-weight:800;margin-bottom:4px;}
+.perm-modal-sub{font-size:.72rem;color:var(--sub);margin-bottom:20px;}
+.perm-modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--sub);cursor:pointer;font-size:1.1rem;}
+
+/* Admin panel */
+.admin-panel{
+  background:rgba(91,106,245,.06);border:1px solid rgba(91,106,245,.15);
+  border-radius:12px;padding:12px 14px;margin-bottom:8px;
+}
+.admin-panel-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(91,106,245,.7);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.admin-user-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.admin-user-row:last-child{border-bottom:none;}
+.admin-user-name{flex:1;font-size:.8rem;font-weight:600;}
+.admin-btn{background:none;border:1px solid rgba(255,255,255,.1);border-radius:7px;color:rgba(255,255,255,.4);cursor:pointer;font-size:.65rem;padding:3px 8px;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.admin-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
+.admin-btn.danger{border-color:rgba(240,92,92,.3);color:#f05c5c;}
+.admin-btn.danger:hover{background:rgba(240,92,92,.1);}
+.admin-btn.warn{border-color:rgba(245,158,11,.3);color:#f59e0b;}
+.admin-btn.warn:hover{background:rgba(245,158,11,.1);}
+.admin-login-row{display:flex;gap:6px;}
+
 /* APP */
 #app{display:none;flex:1;overflow:hidden;flex-direction:column;}
 #app.on{display:flex;}
@@ -763,6 +809,12 @@ body{
       <div class="l-right-title">Odaya Gir</div>
       <div class="l-right-sub">Yeni oda oluştur veya mevcut odaya katıl</div>
 
+      <!-- Kalıcı Oda Butonu -->
+      <button class="perm-btn" onclick="openPermRoom()">
+        🏠 Ana Oda'ya Gir
+      </button>
+      <div class="perm-divider">ya da</div>
+
       <div class="l-tabs">
         <button class="l-tab on" onclick="setLTab('create',this)">✦ Oda Oluştur</button>
         <button class="l-tab" onclick="setLTab('join',this)">→ Odaya Katıl</button>
@@ -823,6 +875,7 @@ body{
     <div class="t-right">
       <button class="music-tog" id="mb" onclick="toggleMute()" title="Mikrofon">🎙️ Mikrofon</button>
       <button class="music-tog" id="vcb" onclick="toggleVoice()" title="Bağlan / Ayrıl">📞 Bağlan</button>
+      <button class="music-tog" id="admin-btn" onclick="openAdminModal()" style="display:none;" title="Admin Paneli">⚡ Admin</button>
       <button class="music-tog" id="fav-btn" onclick="toggleFav()" title="Favoriye ekle/çıkar">⭐</button>
       <button class="music-tog" id="mtog" onclick="toggleMusic()">🎵 Müzik</button>
       <div class="me-chip">
@@ -932,6 +985,33 @@ body{
       <span class="m-nav-ico">🎵</span>
       <span class="m-nav-lbl">Müzik</span>
     </button>
+  </div>
+</div>
+
+<!-- Kalıcı Oda Girişi Modal -->
+<div class="perm-modal" id="perm-modal" style="display:none;" onclick="if(event.target===this)closePermModal()">
+  <div class="perm-modal-box" style="position:relative;">
+    <button class="perm-modal-close" onclick="closePermModal()">✕</button>
+    <div class="perm-modal-title">🏠 Ana Oda</div>
+    <div class="perm-modal-sub">Kalıcı oda — sohbet geçmişi ve müzik korunur</div>
+    <div class="lbl" style="margin-bottom:6px;">Adın</div>
+    <input class="f" id="perm-name" placeholder="Adını gir..." maxlength="20" style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')joinPermRoom();">
+    <div class="lbl" style="margin-bottom:6px;">Yönetici Şifresi <span style="text-transform:none;letter-spacing:0;font-weight:400;opacity:.5;">(opsiyonel)</span></div>
+    <input class="f" id="perm-pass" placeholder="Yönetici şifresi..." maxlength="32" style="margin-bottom:16px;" onkeydown="if(event.key==='Enter')joinPermRoom();">
+    <button class="btn btn-p" onclick="joinPermRoom()">🏠 Ana Oda'ya Gir</button>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div class="perm-modal" id="admin-modal" style="display:none;" onclick="if(event.target===this)closeAdminModal()">
+  <div class="perm-modal-box" style="position:relative;max-width:420px;">
+    <button class="perm-modal-close" onclick="closeAdminModal()">✕</button>
+    <div class="perm-modal-title">⚡ Yönetici Paneli</div>
+    <div class="perm-modal-sub">Kullanıcıları yönet</div>
+    <div class="admin-panel">
+      <div class="admin-panel-title">👥 Kullanıcılar</div>
+      <div id="admin-user-list"></div>
+    </div>
   </div>
 </div>
 
@@ -1112,27 +1192,27 @@ function initSocket(){
   });
 
   // Mevcut oda durumu (yeni katılımda)
-  socket.on('state',({users,queue,cur,playing,position,serverTime})=>{
-    // İlk bağlantıda UI'ı göster
-    if(!document.getElementById('app').classList.contains('on')){
-      goConfirmed();
-    }
-    // Eski peer bağlantılarını temizle (yeniden bağlanma durumu)
+  socket.on('state',({users,queue,cur,playing,position,serverTime,chatHistory,isPermanent,isAdmin,isMuted})=>{
+    if(!document.getElementById('app').classList.contains('on')){ goConfirmed(); }
     Object.keys(pcs).forEach(pid=>{
-      pcs[pid].close();
-      delete pcs[pid];
+      pcs[pid].close(); delete pcs[pid];
       document.getElementById('audio-'+pid)?.remove();
     });
     users.forEach(n=>{if(n!==S.me)addP(n,false);});
-    updateFavPass(); // şifreyi favori kaydında güncelle
-    // Ses açıksa yeniden voice-join gönder — diğerleri offer atsın
-    if(S.voiceOn && localStream){
-      setTimeout(()=>bc('voice-join',{}),500);
+    updateFavPass();
+    if(S.voiceOn && localStream){ setTimeout(()=>bc('voice-join',{}),500); }
+    // Kalıcı oda
+    S.isPermanent = isPermanent;
+    S.isAdmin = isAdmin;
+    S.isMuted = isMuted||false;
+    if(isAdmin){ document.getElementById('admin-btn').style.display='flex'; }
+    // Sohbet geçmişini yükle
+    if(chatHistory?.length){
+      chatHistory.forEach(m=>renderMsg(m.name, m.text, m.name===S.me, m.id));
     }
     if(queue?.length){
       S.queue=queue; renderQ();
       if(cur>=0){
-        // Sunucudan bu yana geçen süreyi hesapla
         const lag = serverTime ? (Date.now()-serverTime)/1000 : 0;
         const syncPos = (position||0) + (playing ? lag : 0);
         loadT(cur, playing, syncPos);
@@ -1140,9 +1220,9 @@ function initSocket(){
     }
   });
 
-  socket.on('user-joined',({name})=>{addP(name,false);sys(`${name} katıldı`);});
+  socket.on('user-joined',({name,isAdmin})=>{addP(name,false,isAdmin);sys(`${name} katıldı`);});
   socket.on('user-left',({name})=>{rmP(name);sys(`${name} ayrıldı`);});
-  socket.on('chat',({name,text})=>renderMsg(name,text,false));
+  socket.on('chat',({name,text,msgId,isAdmin})=>renderMsg(name,text,false,msgId,isAdmin));
 
   socket.on('add-song',({song,from})=>{
     if(!S.queue.find(s=>s.id===song.id)){
@@ -1167,6 +1247,11 @@ function initSocket(){
     doSeek(cur, syncPos);
   });
   socket.on('speaking',({name,v})=>setSpk(name,v));
+  socket.on('msg-deleted',({msgId})=>{ document.querySelector(`[data-msg-id="${msgId}"]`)?.remove(); });
+  socket.on('sys-msg',({text})=>sys(text));
+  socket.on('kicked',()=>{ T('Odadan atıldınız!','❌'); setTimeout(()=>location.reload(),1500); });
+  socket.on('mute-status',({muted})=>{ S.isMuted=muted; T(muted?'Susturuldunuz 🔇':'Susturmanız kaldırıldı 🎙️','ℹ️'); });
+
 
   socket.on('voice-request-offer', ({from})=>{
     // Karşı taraf ses kanalına girdi, biz de ona offer gönderelim
@@ -1748,7 +1833,7 @@ function mkPc(pid){
 }
 
 // PEERS
-function addP(name,isMe){S.peers[name]={name,isMe,speaking:false,micOn:false};renderP();}
+function addP(name,isMe,isAdmin){S.peers[name]={name,isMe,isAdmin:isAdmin||false,speaking:false,micOn:false};renderP();}
 function rmP(name){delete S.peers[name];renderP();}
 function upP(name,d){if(S.peers[name])Object.assign(S.peers[name],d);renderP();}
 function setSpk(name,v){if(S.peers[name]){S.peers[name].speaking=v;renderP();}}
@@ -1761,7 +1846,10 @@ function renderP(){
         <div class="av ${col(p.name)}" style="width:36px;height:36px;border-radius:10px;font-size:.68rem;">${ini(p.name)}</div>
         <div class="pring"></div>
       </div>
-      <div class="pname">${esc(p.name)}${p.isMe?' (sen)':''}</div>
+      <div style="flex:1;overflow:hidden;">
+        <div class="pname">${esc(p.name)}${p.isMe?' <span style="opacity:.5;font-weight:500;">(sen)</span>':''}</div>
+        ${p.isAdmin?'<div style="font-size:.55rem;color:#a5b4fc;font-weight:700;letter-spacing:.06em;margin-top:1px;">⚡ YÖNETİCİ</div>':''}
+      </div>
       <div class="pmic">${p.speaking?'🗣️':p.micOn?'🎙️':'🔇'}</div>
     </div>`).join('');
 }
@@ -1769,17 +1857,19 @@ function renderP(){
 // CHAT
 function send(){
   const f=document.getElementById('cf'),t=f.value.trim();if(!t)return;
-  f.value='';renderMsg(S.me,t,true);bc('chat',{text:t});
+  f.value='';renderMsg(S.me,t,true,null,S.isAdmin);bc('chat',{text:t});
 }
-function renderMsg(from,text,isOwn){
+function renderMsg(from,text,isOwn,msgId,isAdminMsg){
   const el=document.getElementById('msgs'),d=document.createElement('div');
   d.className='msg';
+  if(msgId) d.dataset.msgId=msgId;
+  const adminDel = S.isAdmin && msgId ? `<button class="admin-del-btn" onclick="adminDeleteMsg('${msgId}')" title="Mesajı sil" style="background:none;border:none;color:rgba(255,255,255,.15);cursor:pointer;font-size:.65rem;padding:2px 4px;border-radius:4px;opacity:0;transition:opacity .15s;" onmouseenter="this.style.opacity=1;this.style.color='#f05c5c'" onmouseleave="this.style.opacity=0;this.style.color='rgba(255,255,255,.15)'">✕</button>` : '';
   d.innerHTML=`
     <div class="av ${col(from)}" style="width:28px;height:28px;font-size:.62rem;flex-shrink:0;margin-top:1px;">${ini(from)}</div>
-    <div class="mbody">
+    <div class="mbody" style="flex:1;">
       <div class="mwho" style="color:${isOwn?'var(--accent)':'var(--sub)'}">${esc(from)}</div>
       <div class="mtxt">${esc(text)}</div>
-    </div>`;
+    </div>${adminDel}`;
   el.appendChild(d);el.scrollTop=el.scrollHeight;
 }
 function sys(t){
@@ -1797,6 +1887,58 @@ function T(text,icon='ℹ️'){
 }
 
 window.addEventListener('load',()=>{const h=location.hash.slice(1);if(h)document.getElementById('jr').value=h;});
+
+// ══ KALICI ODA ══
+const PERM_ROOM_ID = 'ana-oda';
+
+function openPermRoom(){
+  document.getElementById('perm-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('perm-name').focus(),100);
+}
+function closePermModal(){
+  document.getElementById('perm-modal').style.display='none';
+}
+function joinPermRoom(){
+  const name = document.getElementById('perm-name').value.trim();
+  const pass = document.getElementById('perm-pass').value.trim();
+  if(!name){ T('Adını gir!','❌'); return; }
+  if(!pass){ T('Şifreyi gir!','❌'); return; }
+  closePermModal();
+  go(name, PERM_ROOM_ID, false, pass);
+}
+
+// Admin modal
+function openAdminModal(){
+  if(!S.isAdmin) return;
+  renderAdminUsers();
+  document.getElementById('admin-modal').style.display='flex';
+}
+function closeAdminModal(){
+  document.getElementById('admin-modal').style.display='none';
+}
+function renderAdminUsers(){
+  const list = document.getElementById('admin-user-list');
+  const users = Object.values(S.peers).filter(p=>!p.isMe);
+  if(!users.length){
+    list.innerHTML='<div style="font-size:.72rem;color:var(--sub);padding:6px 0;">Başka kullanıcı yok</div>';
+    return;
+  }
+  list.innerHTML = users.map(p=>`
+    <div class="admin-user-row">
+      <div class="admin-user-name">${esc(p.name)}</div>
+      <button class="admin-btn warn" onclick="toggleMuteUser('${esc(p.name)}')">🔇 Sustur</button>
+      <button class="admin-btn danger" onclick="bc('admin-kick',{targetName:'${esc(p.name)}'})">🚫 Kick</button>
+    </div>`).join('');
+}
+function toggleMuteUser(name){
+  const peer = S.peers[name];
+  const mute = !peer?.muted;
+  if(peer) peer.muted = mute;
+  bc('admin-mute',{targetName:name, mute});
+}
+function adminDeleteMsg(msgId){
+  bc('admin-delete-msg',{msgId});
+}
 
 // ══ MOBİL SEKME SİSTEMİ ══
 function mInitMobile(){
