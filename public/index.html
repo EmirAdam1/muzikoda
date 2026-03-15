@@ -821,6 +821,8 @@ body{
     <div class="room-chip"><div class="dot"></div><span id="tb-room">oda</span></div>
     <div class="t-spacer"></div>
     <div class="t-right">
+      <button class="music-tog" id="mb" onclick="toggleMute()" title="Mikrofon">🎙️ Mikrofon</button>
+      <button class="music-tog" id="vcb" onclick="toggleVoice()" title="Bağlan / Ayrıl">📞 Bağlan</button>
       <button class="music-tog" id="fav-btn" onclick="toggleFav()" title="Favoriye ekle/çıkar">⭐</button>
       <button class="music-tog" id="mtog" onclick="toggleMusic()">🎵 Müzik</button>
       <div class="me-chip">
@@ -834,11 +836,8 @@ body{
     <!-- SOL: Sesli oda -->
     <div class="left">
       <div class="col-title">
-        <span>🔊 Sesli Oda <span class="vcst" id="vcst" style="font-size:.6rem;font-weight:500;color:var(--sub);text-transform:none;letter-spacing:0;">· bağlı değil</span></span>
-        <div class="vc-btns">
-          <button class="ib" id="mb" onclick="toggleMute()" title="Mikrofon">🎙️ Bağlı</button>
-          <button class="ib" id="vcb" onclick="toggleVoice()" title="Bağlan / Ayrıl">📞 Ses</button>
-        </div>
+        🔊 Sesli Oda
+        <span class="vcst" id="vcst" style="font-size:.6rem;font-weight:500;color:var(--sub);text-transform:none;letter-spacing:0;">· bağlı değil</span>
       </div>
       <div class="pgrid" id="pgrid"></div>
     </div>
@@ -1596,8 +1595,8 @@ async function toggleVoice(){
     localStream?.getTracks().forEach(t=>t.stop());localStream=null;
     Object.values(pcs).forEach(p=>p.close());pcs={};
     S.voiceOn=false;S.muted=false;
-    b.classList.remove('on');b.textContent='📞 Ses';
-    const mb=document.getElementById('mb');mb.classList.remove('on');mb.textContent='🎙️ Bağlı';
+    b.classList.remove('on');b.textContent='📞 Bağlan';
+    const mb=document.getElementById('mb');mb.classList.remove('on');mb.style.color='';mb.textContent='🎙️ Mikrofon';
     st.textContent='· bağlı değil';st.style.color='';
     upP(S.me,{micOn:false,speaking:false});T('Ses kanalından ayrıldın','ℹ️');
   }
@@ -1607,7 +1606,7 @@ function toggleMute(){
   localStream?.getAudioTracks().forEach(t=>t.enabled=!S.muted);
   const b=document.getElementById('mb');
   if(S.muted){b.classList.add('on');b.style.color='var(--red)';b.textContent='🔇 Sessiz';}
-  else{b.classList.remove('on');b.style.color='';b.textContent='🎙️ Bağlı';}
+  else{b.classList.remove('on');b.style.color='';b.textContent='🎙️ Mikrofon';}
   T(S.muted?'Mikrofon kapalı 🔇':'Mikrofon açık 🎙️','ℹ️');
 }
 async function getBestMic(){
