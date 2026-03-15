@@ -1171,10 +1171,13 @@ function goConfirmed(){
 // SOCKET.IO
 function initSocket(){
   if(socket){ socket.disconnect(); socket=null; }
-  socket=io();
-  // once: sadece ilk connect'te join gönder
+  // forceNew:true — her seferinde yeni bağlantı aç
+  socket=io({forceNew:true, reconnection:false});
   socket.once('connect',()=>{
     socket.emit('join',{room:S.room, name:S.me, pass:S.pass||'', create:S.creator||false});
+  });
+  socket.once('connect_error',(e)=>{
+    T('Sunucuya bağlanılamadı: '+e.message,'❌');
   });
 
   socket.on('room-exists',()=>{
@@ -1913,7 +1916,7 @@ function openPermRoom(adminMode){
   passRow.style.display = adminMode ? 'block' : 'none';
   title.textContent = adminMode ? '⚡ Yönetici Girişi' : '🏠 Ana Oda';
   sub.textContent = adminMode ? 'Yönetici şifresiyle giriş yap' : 'Adını gir ve katıl';
-  btn.textContent = adminMode ? '⚡ Yönetici Olarak Gir' : '🏠 Ana Oda'ya Gir';
+  btn.textContent = adminMode ? "⚡ Yönetici Olarak Gir" : "🏠 Ana Odaya Gir";
   if(document.getElementById('perm-pass')) document.getElementById('perm-pass').value='';
   modal.style.display='flex';
   setTimeout(()=>document.getElementById('perm-name').focus(),100);
