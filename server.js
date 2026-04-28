@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ═══════════════════════════════════════
 const PERMANENT_ROOM = {
   id: 'ana-oda',
-  adminPass: 'emir2024',   // sadece yönetici bu şifreyle girer
+  adminPass: process.env.ADMIN_PASS,
   maxHistory: 50,
 };
 
